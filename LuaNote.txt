@@ -1,8 +1,12 @@
 #Lua Note
+___
+
 ## 0.Ticks
 1. do ... end 可以在控制台中插入临时变量
 2. dofile 执行
 3. loadfile 加载
+4. `-[[  -]]`   -------------多行注释
+5. `--`   						单行注释
 
 
 ##1. 类型
@@ -113,4 +117,52 @@ note：
 ### 4 break return
 
 ### 5 函数
-	
+* 冒号操作符： o.func(o,x)  <==>  o::func(x)
+  冒号操作符使调用o.func时将o隐含地作为函数的第一个参数
+
+#####5.1 多重返回值 multiple results
+	* s,e = string.find("hello world, lua","lua")
+
+<pre>
+***********************************
+function foo()
+ return 2,4
+end
+x,y = foo();     -----> x = 2,y = 4
+x,y = foo(),20   -----> y = 20
+x,y,z = foo(),20 -----> z = nil
+***********************************
+</pre>
+
+##### 5.2 变长参数 （...）
+<b>
+<pre>
+function add(...)
+	local s = 0
+		for i,v in ipairs{...} do
+			s = s + v
+		end
+    return s
+end
+print(add(4,4,10,25,12))   --> 54
+</pre>
+</b>
+
+#####5.3 具名实参 named argus
+
+ 。。。。
+
+###6 深入函数
+* a = function(x) return 3*x end
+
+#####6.1 闭合函数
+#####6.2 非全局的函数 non-global function
+#####6.3 尾调用
+
+### 7协同程序 coroutine
+	与线程的区别是 线程是并发的，协同程序只是同一时间单一执行的
+
+#### 7.1 basic
+#### 7.2 pipe  filter
+#### 7.3 iterator
+#### 7.4 non-preemptive
