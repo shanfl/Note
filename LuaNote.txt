@@ -1,0 +1,116 @@
+#Lua Note
+## 0.Ticks
+1. do ... end 可以在控制台中插入临时变量
+2. dofile 执行
+3. loadfile 加载
+
+
+##1. 类型
+1. nil
+2. boolean
+3. number
+4. string
+5. table
+6. function
+7. userdata 
+8. thread
+
+
+note：
+
+* `type（x）` 查看x的类型
+* \#a a的大小
+ 
+##2.表达式
+1. 算术表达式
+
+	1. \+  
+	2. \-
+	3. \*
+	4. /
+	5. %
+	6. ^
+	
+2. 关系表达式
+> <,  > ,>=,<=, == , ~=
+3. 逻辑表达式
+	* and
+	* or
+	* not
+	
+	and 和or 都是用“短路求职”，也就是说它们只会在需要的时候才会去计算和评估第二值。
+
+	print(4 and 5)   --------------------"5"
+
+	print(0 and 5)   --------------------"5"  0也是true
+
+	print（nil and 4）------------------- nil
+
+4. 字符串连接
+	`..`
+ 	print("wer" .. "45")  -------------wer45
+5. 优先级
+	* ^,-(一元)
+	* not, # ,
+	* \*, /, %,
+	* \+, -
+	* <,>,<=,>=,~=,==
+	* and
+	* or
+6. table构造
+	<pre>
+	a = {}
+	a= {x = 10,y = 20}
+	print(a.x)  -------------10
+	print(a[x]) --------------nil
+	</pre>
+
+##3 语句
+### 3.1
+ 	1. 局部变量 local  i=1
+	2. 全局变量 i=1
+### 3.2 结构
+##### 3.2.1 if then else
+	* if a < 0 then a = 0 end
+	* if a < b then return a else return b end
+	* if line > maxlines then
+			showage()
+			line = 0
+	  end
+	* if op == "+" then
+		r = a + b
+	  elseif op == "-" then
+		r = a - b
+	  elseif op == "*" then
+		r = a * b
+	  else
+		error("")
+	  end
+
+#####3.2.2 while
+	* local i = 1
+	  while a[i] do
+		print(a[i])
+		i = i + 1
+	  end
+	* a = 10
+	  while a >= 0 do
+		print(a)
+		a = a-1
+	  end
+##### 3.2.3 repeat
+<pre>
+	repeat
+		line = io.read()
+	until line ~=""
+	print(line)
+</pre>
+##### 3.2.4 for
+<pre>
+	for i = 10, 1,-1 do print(i) end
+	其中 -1 为步长
+</pre>
+### 4 break return
+
+### 5 函数
+	
