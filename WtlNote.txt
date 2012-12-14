@@ -1,0 +1,61 @@
+# Wtl Note
+
+----
+
+
+## ATL
+<b>ATL Windowing-class Hierarchy</b>
+
+> ![img](./wtlpic/atl_he.png)
+
+<b>Wtl Windowing-class Hierarchy</b>
+
+>![img](./wtlpic/wtl_he.png)
+
+## ALL
+
+![imag](./wtlpic/wtl_all.png)
+----
+
+##CMessageMap
+
+<pre><code>
+class ATL_NO_VTABLE CMessageMap
+{
+public:
+	virtual BOOL ProcessWindowMessage(
+		_In_ HWND hWnd,
+		_In_ UINT uMsg,
+		_In_ WPARAM wParam,
+		_In_ LPARAM lParam,
+		_Inout_ LRESULT& lResult,
+		_In_ DWORD dwMsgMapID) = 0;
+};
+
+#define <B>BEGIN_MSG_MAP(theClass)</B> \
+public: \
+	BOOL ProcessWindowMessage(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam,\
+		_In_ LPARAM lParam, _Inout_ LRESULT& lResult, _In_ DWORD dwMsgMapID = 0) \
+	{ \
+		BOOL bHandled = TRUE; \
+		(hWnd); \
+		(uMsg); \
+		(wParam); \
+		(lParam); \
+		(lResult); \
+		(bHandled); \
+		switch(dwMsgMapID) \
+		{ \
+		case 0:
+
+
+#define <B>END_MSG_MAP()</B> \
+			break; \
+		default: \
+			ATLTRACE(ATL::atlTraceWindowing, 0, _T("Invalid message map ID (%i)\n"), dwMsgMapID); \
+			ATLASSERT(FALSE); \
+			break; \
+		} \
+		return FALSE; \
+	}
+</code></pre>
