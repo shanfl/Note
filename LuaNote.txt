@@ -166,3 +166,325 @@ print(add(4,4,10,25,12))   --> 54
 #### 7.2 pipe  filter
 #### 7.3 iterator
 #### 7.4 non-preemptive
+
+
+----
+##8.<font color="#00ff00">TABLE</font>
+
+1. <font color="#ff0000">创建table in c++</font>
+<PRE>
+> `void lua_createtable (lua_State *L, int narr, int nrec);`
+<CODE>
+Creates a new empty table and pushes it onto the stack. 
+The new table has space pre-allocated for <b>narr</b> <font color="#0000ff">array elements</font> and <b>nrec</b> <font color="#0000ff">non-array elements. </font>
+This pre-allocation is useful when you know exactly how many elements the table will have. 
+Otherwise you can use the function <B><font color="#0000ff">lua_newtable</font></B>. 
+</CODE>
+</PRE>
+
+2.lua 语言创建table
+> 
+<PRE>
+t = {}    -- construct an empty table and assign it to variable "t"
+print(t)
+</PRE>
+
+>  
+>  2.1  Tables as arrays
+<pre>
+> t = { 1,1,2,3,5,8,13 }
+> print( t[1] )
+1
+> print( t[0] )
+nil
+> print( t[4] )
+3
+</pre>
+
+<font color="#ff00">equal to</font>
+<pre>
+> t = {}
+> t[1]=1 t[2]=1 t[3]=2 t[4]=3 t[5]=5 t[6]=8 t[7]=13
+</pre>
+2.2 size of table
+> 
+ #t
+
+2.3 遍历
+> 
+<pre>
+> for i,v in ipairs(t) do print(i,v) end
+	1       1
+	2       1
+	3       2
+	4       3
+	5       5
+	6       8
+	7       13
+	8       21
+</pre>
+<font color="#ff00">equal to</font>
+<pre>
+> for i=1,# t do
+	print(i,t[i])
+	end
+</pre>
+
+2.4 Tables as dictionaries
+
+<pre>
+    > t = { apple="green", orange="orange", banana="yellow" }
+
+<font color="#ff00">is the same as:</font>
+
+    > t = { ["apple"]="green", ["orange"]="orange", ["banana"]="yellow" }
+
+</pre>
+
+2.5 Mixed table constructors
+
+<pre>
+1. > t = { 2,4,6, language="Lua", version="5.1" }
+
+<font color="#0000ff">
+Here we have an array of numbers followed by some dictionary values.
+We can use our Lua table library functions to output the contents of the table.
+</font>
+2. > for k,v in pairs(t) do print(k,v) end
+    1       2
+    version 5.1
+    3       6
+    language        Lua
+    2       4
+    > for i,v in ipairs(t) do print(i,v) end
+    1       2
+    2       4
+    3       6
+</pre>
+
+
+2.6 demo
+<pre>
+> tablekey = {1,2,3}                     -- create a table with a variable referencing it
+> a = { [tablekey]="yadda" }             -- construct a table using the table as a key
+> for k,v in pairs(a) do print(k,v) end  -- display the table elements
+table: 0035F2F0 yadda
+> = a[tablekey]                          -- retrieve a value from the table
+yadda
+> print(tablekey)              -- the table value is the same as the key above
+table: 0035F2F0
+</pre>
+
+
+
+
+3.FAQs
+
+1.  how to nest tables 
+<pre>
+<font color="#777777">
+I want to create a table like
+
+myTable = {
+    [0] = { ["a"] = 4, ["b"] = 2 },
+    [1] = { ["a"] = 13, ["b"] = 37 }
+}
+using the C API?
+
+My current approach is
+
+lua_createtable(L, 0, 2);
+int c = lua_gettop(L);
+lua_pushstring(L, "a");
+lua_pushnumber(L, 4);
+lua_settable(L, c);
+lua_pushstring(L, "b");
+lua_pushnumber(L, 2);
+lua_settable(L, c);
+
+to create the inner tables in a loop. Before, this loop, I use
+
+lua_createtable(L, 2, 0);
+int outertable = lua_gettop(L);
+
+to create the outer table for 2 numeric slots.
+
+But how can I save the inner tables to the outer table?
+</font>
+<font color="#ff0000">Answers</font>
+</pre>
+<pre><code>
+#include < stdio.h >
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+
+int main()
+{
+    int res;
+    lua_State *L = lua_open();
+    luaL_openlibs(L);
+
+    lua_newtable(L); /* bottom table */
+
+    lua_newtable(L); /* upper table */
+
+    lua_pushinteger(L, 4);
+    lua_setfield(L, -2, "four"); /* T[four] = 4 */
+    lua_setfield(L, -2, "T");  /* name upper table field T of bottom table */
+    lua_setglobal(L, "t"); /* set bottom table as global variable t */
+
+    res = luaL_dostring(L, "print(t.T.four == 4)");
+    if(res)
+    {
+        printf("Error: %s\n", lua_tostring(L, -1));
+    }
+
+    return 0;
+}
+</code>
+</pre>
+
+The program will simply print true.
+
+If you need numeric indices, then you continue using <font color="#ff0000">lua_settable</font>:
+<pre><code>
+#include <stdio.h>
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+
+int main()
+{
+    int res;
+    lua_State *L = lua_open();
+    luaL_openlibs(L);
+
+    lua_newtable(L); /* bottom table */
+
+    lua_newtable(L); /* upper table */
+
+    lua_pushinteger(L, 0);
+    lua_pushinteger(L, 4);
+    lua_settable(L, -3);  /* uppertable[0] = 4; pops 0 and 4 */
+    lua_pushinteger(L, 0);
+    lua_insert(L, -2); /* swap uppertable and 0 */
+    lua_settable(L, -3); /* bottomtable[0] = uppertable */
+    lua_setglobal(L, "t"); /* set bottom table as global variable t */
+
+    res = luaL_dostring(L, "print(t[0][0] == 4)");
+    if(res)
+    {
+        printf("Error: %s\n", lua_tostring(L, -1));
+    }
+
+    return 0;
+}
+
+</code>
+</pre>
+
+
+2. another
+
+> 	table, 作为Lua中的重要类型, 为数据管理提供了许多便利. 我们可以用C++, 在Lua上下文(Lua_State)中注册table, 以便lua程序可以方便的和C++进行交互.
+
+先来看一段C++代码:
+<pre>
+<code>
+`lua_State* pLuaState = luaL_newstate();
+luaL_openlibs(pLuaState); 
+lua_createtable(pLuaState, 0, 1);
+lua_pushcclosure(pLuaState, CallBack, 0);
+lua_setfield(pLuaState, -2, "Add");
+lua_setfield(pLuaState, LUA_GLOBALSINDEX, "Math");`
+</code>
+<pre>
+
+> 
+这里, 我创建了一个Lua table(lua_createtable), 并将C++函数CallBack以"Add"为键值,
+注册到新的table中, 然后将table作为全局变量Math注册到当前的上下文中.这样, 我在lua代码中就可以这样写:
+`print(Math.Add(1100,10))`
+这条语句, 通过执行Math表中的Add, 从而调用到C++中的CallBack函数.
+当我们不再需要这个table的时候, 我们使用以下的语句, 将table的引用减少.
+
+> 
+`lua_pushnil(pLuaState);`
+`lua_setfield(pLuaState, LUA_GLOBALSINDEX, "Math");`
+
+这两条语句相当于lua中的 Math = nil, 这样, GC就可以回收table和function的资源了.
+
+下面附上完整的C++代码:
+<pre>
+#include < lua.hpp >
+ 
+#pragma comment(lib, "lua51.lib")
+ 
+int CallBack(lua_State* pLuaState)
+{
+    int a = luaL_checkint(pLuaState, 1);
+    int b = luaL_checkint(pLuaState, 2);
+ 
+    lua_pushnumber(pLuaState, a + b);
+ 
+    return 1;
+}
+ 
+int _tmain(int argc, _TCHAR* argv[])
+{
+    lua_State* pLuaState = luaL_newstate();
+    luaL_openlibs(pLuaState);
+ 
+    lua_createtable(pLuaState, 0, 1);
+    lua_pushcclosure(pLuaState, CallBack, 0);
+    lua_setfield(pLuaState, -2, "Add");
+    lua_setfield(pLuaState, LUA_GLOBALSINDEX, "Math");
+ 
+    if (luaL_loadfile(pLuaState, "test.lua") ||
+        lua_pcall(pLuaState, 0, 0, 0))
+    {
+        printf("%s\n", lua_tostring(pLuaState, -1));
+        lua_pop(pLuaState, 1);
+        lua_close(pLuaState);
+        return 0;
+    }
+ 
+    lua_pushnil(pLuaState);
+    lua_setfield(pLuaState, LUA_GLOBALSINDEX, "Math");
+ 
+    if (luaL_dostring(pLuaState, "print(Math.Add(100, 10))"))
+    {
+        printf("%s\n", lua_tostring(pLuaState, -1));
+        lua_pop(pLuaState, 1);
+        lua_close(pLuaState);       // 这里加断点调试, 查看控制台输出结果
+        return 0;
+    }
+ 
+    lua_close(pLuaState);
+    return 0;
+}
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
