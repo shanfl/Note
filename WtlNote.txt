@@ -59,3 +59,61 @@ public: \
 		return FALSE; \
 	}
 </code></pre>
+
+## 3. custum controls
+1. <pre>
+class MyListView : public CWindowImpl< MyListView, CListViewCtrl >,
+                       public CCustomDraw< MyListView >     
+</pre>
+
+2. <pre><code>
+`#if (_WTL_VER >= 0x0700)
+	BOOL m_bHandledCD;
+	BOOL IsMsgHandled() const
+	{
+		return m_bHandledCD;
+	}
+	void SetMsgHandled(BOOL bHandled)
+	{
+		m_bHandledCD = bHandled;
+	}
+`#if (_WTL_VER > 0x0700)
+`#pragma message("WTL > 7.0 Revisit WTL Bug Kludge:  Is IsMsgHandled, " \
+	`"SetMsgHandled still required in derived class when "  \
+	`"using CCustomDraw?");
+`#endif //(_WTL_VER > 0x0700)
+`#endif //(_WTL_VER >= 0x0700)
+`#endif</code></pre>
+
+<b>or</b>
+> 
+<font color="#ff00000">`BEGIN_MSG_MAP_EX`</font>
+
+<b>or</b>
+> 
+IN PARENT HWND : </br>
+> <font color="#ff00000"><b>`REFLECT_NOTIFICATIONS()`</font></b></br>
+in this CLASS: </br>
+> <font color="#ff00000"><b>`CHAIN_MSG_MAP_ALT(CCustomDraw< THIS >,1)`</font></b>
+
+
+3. realize 
+   * DWORD OnPrePaint(int /\*idCtrl\*/, LPNMCUSTOMDRAW /\*lpNMCustomDraw\*/)
+   * DWORD OnItemPrePaint(int /\*idCtrl\*/, LPNMCUSTOMDRAW lpNMCustomDraw)
+> IN:  <font color="#3322ff"><b>`DWORD OnItemPrePaint(int /\*idCtrl\*/, LPNMCUSTOMDRAW lpNMCustomDraw)`</b></font>
+> 
+<pre><code> <font color="#337700"><b> NMLVCUSTOMDRAW* pLVCD = reinterpret_cast<NMLVCUSTOMDRAW*>( lpNMCustomDraw );</b></font>
+     // This is the prepaint stage for an item. Here's where we set the
+     // item's text color. Our return value will tell Windows to draw the
+     // item itself, but it will use the new color we set here for the background
+     COLORREF crText;
+     if ( (pLVCD->nmcd.dwItemSpec % 2) == 0 )
+	 {
+       		<font color="#ff0000"><b>pLVCD->crText = RGB(255,0,255);
+	   		pLVCD->clrText  = RGB(0,125,255);</b></font>
+	 }
+     else 
+	 {
+      		<font color="#ff0000"><b>pLVCD->crText = RGB(255,255,255); 
+	  		pLVCD->clrText  = RGB(255,125,0);</b></font>
+	 }</code> <pre>
