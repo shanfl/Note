@@ -370,3 +370,5 @@ and apply it to <FONT color="#ff000f"><b>CTitleDockingWindowImpl</b></font>.
 
 * <FONT color="#ff000f"><b>CSimpleSplitterBar[SimpleSplitterBar.h]</b></font> - Very simple splitter bar.
 * <FONT color="#ff000f"><b>CSimpleSplitterBarEx[SimpleSplitterBar.h]</b></font> - another simple splitter bar.
+
+------------
