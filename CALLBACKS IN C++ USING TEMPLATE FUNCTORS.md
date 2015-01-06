@@ -1,16 +1,16 @@
 CALLBACKS IN C++ USING TEMPLATE FUNCTORS
-
+====
 Copyright 1994 Rich Hickey
 
 INTRODUCTION
-
+----
 One of the many promises of Object-Oriented programming is that it will allow for plug-and-play software design with re-usable components. Designers will pull objects from their library 'shelves' and hook them together to make software. In C++, this hooking together of components can be tricky, particulary if they are separately designed. We are still a long way from interoperable libraries and application components. Callbacks provide a mechanism whereby independently developed objects may be connected together. They are vital for plug and play programming, since the likelihood of Vendor A implementing their library in terms of Vendor B's classes, or your home-brewed classes, is nil.
 
 Callbacks are in wide use, however current implementations differ and most suffer from shortcomings, not the least of which is their lack of generality. This article describes what callbacks are, how they are used, and the criteria for a good callback mechanism. It summarizes current callback methods and their weaknesses. It then describes a flexible, powerful and easy-to-use callback technique based on template functors - objects that behave like functions.
 
 CALLBACK FUNDAMENTALS
-
-What Are Callbacks?
+-----
+####What Are Callbacks?
 
 When designing application or sub-system specific components we often know all of the classes with which the component will interact and thus explicity code interfaces in terms of those classes. When designing general purpose or library components however, it is often necessary or desirable to put in hooks for calling unknown objects. What is required is a way for one component to call another without having been written in terms of, or with knowledge of, the other component's type. Such a 'type-blind' call mechanism is often referred to as a callback.
 
@@ -53,7 +53,7 @@ Generic - The primary differences between different callback situations are the 
 Flexible - Experience has shown that callback systems that require an exact match between callback function and callee function signatures are too rigid for real-world use. For instance you may encounter a callback that passes a Derived * that you want to connect to a callee function that takes a Base *.
 
 CURRENT MECHANISMS
-
+----
 Function Model
 
 The simplest callback mechanism is a pointer-to-function, a la ANSI C's qsort(). Getting a stand-alone function to act upon a particular object, however, usually involves kludges like using static or global pointers to indicate the target object, or having the callback function take an extra parameter (usually a pointer to the object to act upon). The static/global pointer method breaks down when the callback relationship exists across calls, i.e. 'I want to connect this Button to this X and this other Button to this other X, for the duration of the app'. The extra paramter method, if done type-safely, introduces undesirable coupling between the caller and callee types.
