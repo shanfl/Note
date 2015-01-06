@@ -1,6 +1,9 @@
+
 CALLBACKS IN C++ USING TEMPLATE FUNCTORS
 ====
 Copyright 1994 Rich Hickey
+
+[TOC]
 
 INTRODUCTION
 ----
@@ -9,8 +12,8 @@ One of the many promises of Object-Oriented programming is that it will allow fo
 Callbacks are in wide use, however current implementations differ and most suffer from shortcomings, not the least of which is their lack of generality. This article describes what callbacks are, how they are used, and the criteria for a good callback mechanism. It summarizes current callback methods and their weaknesses. It then describes a flexible, powerful and easy-to-use callback technique based on template functors - objects that behave like functions.
 
 CALLBACK FUNDAMENTALS
------
-####What Are Callbacks?
+----
+What Are Callbacks?
 
 When designing application or sub-system specific components we often know all of the classes with which the component will interact and thus explicity code interfaces in terms of those classes. When designing general purpose or library components however, it is often necessary or desirable to put in hooks for calling unknown objects. What is required is a way for one component to call another without having been written in terms of, or with knowledge of, the other component's type. Such a 'type-blind' call mechanism is often referred to as a callback.
 
@@ -53,7 +56,7 @@ Generic - The primary differences between different callback situations are the 
 Flexible - Experience has shown that callback systems that require an exact match between callback function and callee function signatures are too rigid for real-world use. For instance you may encounter a callback that passes a Derived * that you want to connect to a callee function that takes a Base *.
 
 CURRENT MECHANISMS
-----
+
 Function Model
 
 The simplest callback mechanism is a pointer-to-function, a la ANSI C's qsort(). Getting a stand-alone function to act upon a particular object, however, usually involves kludges like using static or global pointers to indicate the target object, or having the callback function take an extra parameter (usually a pointer to the object to act upon). The static/global pointer method breaks down when the callback relationship exists across calls, i.e. 'I want to connect this Button to this X and this other Button to this other X, for the duration of the app'. The extra paramter method, if done type-safely, introduces undesirable coupling between the caller and callee types.
@@ -73,7 +76,7 @@ Beware of callback mechanisms that appear type safe but are in fact not. These m
 Parameterize the Caller
 
 The component designer could parameterize the component on the type of the callee. Such parameterization is inappropriate in many situations and callbacks are one of them. Consider:
-
+```
 class Button{
 public:
 	virtual void click();
@@ -104,6 +107,7 @@ public:
 CDPlayer cd;
 ButtonThatCallsBack<CDPlayer> button(&cd,&CDPlayer::play);
 button.click();	//calls cd.play()
+```
 A ButtonThatCallsBack<CDPlayer> would thus 'know' about CDPlayer and provides an interface explicitly based on it. The problem is that this introduces rigidity in the system in that the callee type becomes part of the caller type, i.e. it is 'type-intrusive'. All code that creates ButtonThatCallsBack objects must be made aware of the callee relationship, increasing coupling in the system. A ButtonThatCallsBack<X> is of a different type than a ButtonThatCallsBack<Y>, thus preventing by-value manipulation.
 
 If a component has many callback relationships it quickly becomes unworkable to parameterize them all. Consider a Button that wants to maintain a dynamic list of callees to be notified upon a click event. Since the callee type is built into the Button class type, this list must be either homogeneous or typeless.
@@ -115,7 +119,7 @@ Callee Mix-In
 The caller component designer can invent an abstract base class to be the target of the callback, and indicate to application developers that they mix-in this base in order to connect their class with the component. I call this the "callee mix-in."
 
 Here the designer of the Button class wants to offer a click notification callback, and so defines a nested class Notifiable with a pure virtual function notify() that has the desired signature. Clients of the Button class will have to pass to its constructor a pointer to a Notifiable, which the Button will use (at some point later on) for notification of clicks:
-
+```
 class Button{
 public:
 	class Notifiable{
@@ -136,36 +140,40 @@ public:
 	void play();
 	//...
 };
+```
 an application developer wishing to have a Button call back a CDPlayer would have to derive a new class from both CDPlayer and Button::Notifiable, overriding the pure virtual function to do the desired work:
-
+```
 class MyCDPlayer:public CDPlayer,public Button::Notifiable{
 public:
 	void notify()
 		{play();}
 };
+```
 and use this class rather than CDPlayer in the application:
-
+```
 MyCDPlayer cd;
 Button button(&cd);
 button.click();	//calls cd.play()
+```
 This mechanism is type safe, achieves the decoupling of Button and CDPlayer, and is good magazine article fodder. It is almost useless in practice, however.
 
 The problem with the callee mix-in is that it, too, is type-intrusive, i.e. it impacts the type of the callee, in this case by forcing derivation. This has three major flaws. First, the use of multiple inheritance, particularly if the callee is a callee of multiple components, is problematic due to name clashes etc. Second, derivation may be impossible, for instance if the application designer gets CDPlayers from an unchangeable, untouchable API (library designers note: this is a big problem with mix-in based mechanisms in general). The third problem is best demonstrated. Consider this version of CDPlayer:
-
+```
 class CDPlayer{
 public:
 	void play();
 	void stop();
 	//...
 };
+```
 It doesn't seem unreasonable to have an application where one Button calls CDPlayer::play() and another CDPlayer::stop(). The mix-in mechanism fails completely here, since it can only support a single mapping between caller/callee/member-function, i.e. MyCDPlayer can have only one notify().
 
 CALLBACKS USING TEMPLATE FUNCTORS
-
+----
 When I first thought about the inter-component callback problem I decided that what was needed was a language extension to support 'bound-pointers', special pointers representing information about an object and a member function of that object, storable and callable much like regular pointers to functions. ARM 5.5 commentary has a brief explanation of why bound pointers were left out.
 
 How would bound pointers work? Ideally you would initialize them with either a regular pointer-to-function or a reference to an object and a pointer-to-member-function. Once initialized, they would behave like normal pointer-to-functions. You could apply the function call operator() to them to invoke the function. In order to be suitable for a callback mechanism, the information about the type of the callee would _not_ be part of the type of the bound-pointer. It might look something like this:
-
+```
 // Warning - NOT C++
 
 class Fred{
@@ -175,13 +183,14 @@ public:
 
 Fred fred;
 void (* __bound fptr)() = &fred.foo;
+```
 Here fptr is a bound-pointer to a function that takes no arguments and returns void. Note that Fred is not part of fptr's type. It is initialized with the object fred and a pointer-to-member-function-of-Fred, foo. Saying:
 
 fptr();
 would invoke foo on fred.
 
 Such bound-pointers would be ideal for callbacks:
-
+```
 // Warning - NOT C++
 
 class Button{
@@ -205,6 +214,7 @@ public:
 CDPlayer cd;
 Button button(&cd.play);
 button.click();	    //calls cd.play()
+```
 Bound-pointers would require a non-trivial language extension and some tricky compiler support. Given the extreme undesirability of any new language features I'd hardly propose bound-pointers now. Nevertheless I still consider the bound-pointer concept to be the correct solution for callbacks, and set out to see how close I could get in the current and proposed language. The result is the Callback library described below. As it turns out, the library solution can not only deliver the functionality shown above (albeit with different syntax), it proved more flexible than the language extension would have been!
 
 Returning from the fantasy world of language extension, the library must provide two things for the user. The first is some construct to play the role of the 'bound-pointer'. The second is some method for creating these 'bound-pointers' from either a regular pointer-to-function or an object and a pointer-to-member-function.
@@ -215,9 +225,11 @@ The construct provided by the library for creating functors is an overloaded tem
 
 The resulting mechanism is very easy to use. A complete example:
 
+```
 #include <callback.h>	//include the callback library header
 #include <iostream.h>
-
+```
+```
 class Button{
 public:
 	Button(const Functor0 &uponClickDoThis)
@@ -258,25 +270,31 @@ void main()
 	stopButton.click();	//calls cd.stop()
 	wowButton.click();	//calls wow()
 	}
+```
+
 Voila! A component (Button) has been connected to application objects and functions it knows nothing about and that know nothing about Button, without any custom coding, derivation or modification of the objects involved. And it's type safe.
 
 The Button class designer specifies the callback interface in terms of Functor0, a functor that takes no arguments and returns void. It stores the functor away in its member notify. When it comes time to call back, it simply calls operator() on the functor. This looks and feels just like a call via a pointer-to-function.
 
 Connecting something to a component that uses callbacks is simple. You can just initialize a Functor with the result of an appropriate call to makeFunctor(). There are two flavors of makeFunctor(). You can call it with a ptr-to-stand-alone function:
-
-	makeFunctor(&wow)
+```
+makeFunctor(&wow)
+```
 OR with an object and a pointer-to-member function:
-
-	makeFunctor(cd,&CDPlayer::play)
+```
+makeFunctor(cd,&CDPlayer::play)
+```
 I must come clean at this point, and point out that the syntax above for makeFunctor() is possible only in the proposed language, because it requires template members (specifically, the Functor constructors would have to be templates). In the current language the same result can be achieved by passing to makeFunctor() a dummy parameter of type ptr-to-the-Functor-type-you-want-to-create. This iteration of the callback library requires you pass makeFunctor() the dummy as the first parameter. Simply cast 0 to provide this argument:
 
+```
 	makeFunctor((Functor0 *)0,&wow)
 
 	makeFunctor((Functor0 *)0,cd,&CDPlayer::play);
+```
 I will use this current-language syntax from here on.
 
 The Button class above only needs a callback function with no arguments that returns void. Other components may want to pass data to the callback or get a return back. The only things distinguishing one functor from another are the number and types of the arguments to operator() and its return type, if any. This indicates that functors can be represented in the library by (a set of) templates:
-
+```
 //Functor classes provided by the Callback library:
 
 Functor0	//not a template - nothing to parameterize
@@ -289,8 +307,9 @@ Functor1wRet<P1,RT>
 Functor2wRet<P1,P2,RT>
 Functor3wRet<P1,P2,P3,RT>
 Functor4wRet<P1,P2,P3,P4,RT>
+```
 These are parameterized by the types of their arguments (P1 etc) and return value (RT) if any. The numbering is necessary because we can't overload template class names on number of parameters. 'wRet' is appended to distinguish those with return values. Each has an operator() with the corresponding signature, for example:
-
+```
 template <class P1>
 class Functor1{
 public:
@@ -304,8 +323,10 @@ public:
 	RT operator()(P1 p1,P2 p2)const;
 	//...
 };
+```
 These Functor classes are sufficient to meet the callback needs of component designers, as they offer a standard and consistent way to offer callback services, and a simple mechanism for invoking the callback function. Given these templates in the library, a component designer need only pick one with the correct number of arguments and specify the desired types as parameters. Here's the DataEntryField that wants a validation callback that takes a const String & and returns a Boolean:
 
+```
 #include <callback.h>
 
 class DataEntryField{
@@ -322,6 +343,7 @@ private:
 	//validate has a
 	//Boolean operator()(const String &)
 };
+```
 These trivial examples just scratch the surface of what you can do given a general purpose callback library such as this. Consider their application to state machines, dispatch tables etc.
 
 The callback library is 100% compile-time type safe. (Where compile time includes template-instantiation time). If you try to make a functor out of something that is not compatible with the functor type you will get a compiler error. All correct virtual function behavior is preserved.
@@ -329,7 +351,7 @@ The callback library is 100% compile-time type safe. (Where compile time include
 The system is also type flexible. You'll note that throughout this article I have said 'type compatible' rather than 'exactly-matching' when talking about the relationship between the callback function and the callee function. Experience has shown that requiring an exact match makes callbacks too rigid for practical use. If you have done much work with pointer-to-function based interfaces you've probably experienced the frustration of having a pointer to a function 'that would work' yet was not of the exact type required for a match.
 
 To provide flexibility the library supports building a functor out of a callee function that is 'type compatible' with the target functor - it need not have an exactly matching signature. By type compatible I mean a function with the same number of arguments, of types reachable from the functor's argument types by implicit conversion. The return type of the function must be implicitly convertible to the return type of the functor. A functor with no return can be built from a function with a return - the return value is safely ignored.
-
+```
 //assumes Derived publicly derived from Base
 void foo(Base &);
 long bar(Derived &);
@@ -340,6 +362,7 @@ Functor1<Derived&> f1 =
 
 f1 = makeFunctor((Functor1<Derived&> *)0,&bar);
 	//ok - ignores return
+```
 Any necessary argument conversions or ignoring of returns is done by the compiler, i.e. there is no coercion done inside the mechanism or by the user. If the compiler can't get from the arguments passed to the functor to the arguments required by the callee function, the code is rejected at compile time. By allowing the compiler to do the work we get all of the normal conversions of arguments - derived to base, promotion and conversion of built-in types, and user-defined conversions.
 
 The type-flexibility of the library is something that would not have been available in a language extension rendition of bound pointers.
@@ -349,7 +372,7 @@ Rounding out the functionality of the Functor classes are a default constructor 
 At this point you know everything you need to use the callback library. All of the code is in one file, callback.h. To use a callback in a component class, simply instantiate a Functor with the desired argument types. To connect some stuff to a component that uses Functors for callbacks, simply call makeFunctor() on the stuff. Easy.
 
 Power Templates
-
+---
 As usual, what is easy for the user is often tricky for the implementor. Given the black-box descriptions above of the Functor classes and makeFunctor() it may be hard to swallow the claims of type-safety, transparent conversions, correct virtual function behavior etc. A look behind the curtain reveals not only how it works, but also some neat template techniques. Warning: most people find the pointer-to-member and template syntax used in the implementation daunting at first.
 
 Obviously some sort of magic is going on. How can the Functor class, with no knowledge of the type or signature of the callee, ensure a type safe call to it, possibly with implicit conversions of the arguments? It can't, so it doesn't. The actual work must be performed by some code that knows both the functor callback signature and everything about the callee. The trick is to get the compiler to generate that code, and have the Functor to point to it. Templates can help out all around.
@@ -367,9 +390,9 @@ All of this will become clearer with the details.
 For each of the 10 Functor classes there are 2 Translator classes and 3 versions of makeFunctor(). We'll examine a slice of the library here, Functor1 and its associated Translators and makeFunctors. The other Functors differ only in the number of args and return values.
 
 The Functors
-
+---
 Since the Functor objects are the only entities held by the caller, they must contain the data about the callee. With some care we can design a base class which can hold, in a typeless manner, the callee data, regardless of whether the callee is a ptr-to-function or object/ptr-to-member-function combo:
-
+```
 //typeless representation of a function or object/mem-func
 
 class FunctorBase{
@@ -406,10 +429,11 @@ public:
 	};
 	void *callee;
 };
+```
 All Functors are derived (protected) from this base. FunctorBase provides a constructor from typeless args, where if c is 0 the callee is a pointer-to-function and f is that pointer, else c is pointer to the callee object and f is a pointer to a pointer-to-member function and sz is that ptr-to-member-function's size (in case an implementation has pointer-to-members of differing sizes). It has a default constructor which inits to an 'unset' state, and an operator int to allow for testing the state (set or unset).
 
 The Functor class is a template. It has a default constructor and the required operator() corresponding to its template parameters. It uses the generated copy constructor and assignment operators.
-
+```
 /************************* one arg - no return *******************/
 template <class P1>
 class Functor1:protected FunctorBase{
@@ -427,6 +451,7 @@ protected:
 private:
 	Thunk thunk;
 };
+```
 The Functor class has a protected constructor that takes the same typeless args as FunctorBase, plus an additional first argument. This argument is a pointer to function (the thunk function) that takes the same arguments as the operator(), plus an additional first argument of type const FunctorBase &. The Functor stores this away (in thunk) and implements operator() by calling thunk(), passing itself and the other arguments. Thus it is this thunk() function that does the work of 'calling back'.
 
 A key issue at this point is whether operator() should be virtual. In the first iteration of my mechanism the Functor classes were abstract and the operator()'s pure virtual. To use them for callbacks a set of derived template classes parameterized on the callee type was provided. This required that functors always be passed and held by reference or pointer and never by value. It also required the caller component or the client code maintain the derived object for as long as the callback relationship existed. I found the maintenance and lifetime issues of these functor objects to be problematic, and desired by-value syntax.
@@ -434,13 +459,13 @@ A key issue at this point is whether operator() should be virtual. In the first 
 In the current mechanism the Functor classes are concrete and the operator() is non-virtual. They can be treated and used just like ptr-to-functions. In particular, they can be stored by value in the component classes.
 
 The Translators
-
+---
 Where does the thunk() come from? It is generated by the compiler as a static member of a template 'translator' class. For each Functor class there are two translator classes, one for stand-alone functions (FunctionTranslator) and one for member functions (MemberTranslator). The translator classes are parameterized by the type of the Functor as well as the type(s) of the callee. With this knowledge they can, in a fully type-safe manner, perform two important tasks.
 
 First, they can initialize the Functor data. They do this by being publicly derived from the Functor. They are constructed with typed callee information and which they pass (untyped) to the functor's protected constructor.
 
 Second, they have a static member function thunk(), which, when passed a FunctorBase, converts its callee data back into typed information, and executes the callback on the callee. It is a pointer to this static function which is passed to the Functor constructor.
-
+```
 template <class P1,class Func>
 class FunctionTranslator1:public Functor1<P1>{
 public:
@@ -450,8 +475,9 @@ public:
 		(Func(ftor.func))(p1);
 		}
 };
+```
 FunctionTranslator is the simpler of the two. It is parameterized by the argument type of the Functor and some ptr-to-function type (Func). Its constructor takes an argument of type Func and passes it and a pointer to its static thunk() function to the base class constructor. The thunk function, given a FunctorBase ftor, casts ftor's func member back to its correct type (Func) and calls it. There is an assumption here that the FunctorBase ftor is one initialized by the constructor (or a copy). There is no danger of it being otherwise, since the functors are always initialized with matching callee data and thunk functions. This is what is called a 'safe' cast, since the same entity that removed the type information also re-instates it, and can guarantee a match. If Func's signature is incompatible with the call, i.e. if it cannot be called with a single argument of type P1, then thunk() will not compile. If implicit conversions are required the compiler will perform them. Note that if func has a return it is safely ignored.
-
+```
 template <class P1,class Callee, class MemFunc>
 class MemberTranslator1:public Functor1<P1>{
 public:
@@ -464,22 +490,24 @@ public:
 		(callee->*memFunc)(p1);
 		}
 };
+```
 MemberTranslator is parameterized by the argument type of the Functor, some class type (Callee), and some ptr-to-member-function type (MemFunc). Not surprisingly it's constructor is passed 2 arguments, a Callee object (by reference) and a ptr-to-member-function, both of which are passed, along with the thunk function, to the base class constructor. Once again, the thunk function casts the typeless info back to life, and then calls the member function on the object, with the passed parameter.
 
 Since the Translator objects are Functor objects, and fully 'bound' ones at that, they are suitable initializers for their corresponding Functor, using the Functor's copy constructor. We needn't worry about the 'chopping' effect since the data is all in the base class portion of the Translator class and there are no virtual functions involved. Thus they are perfect candidates for the return value of makeFunctor()!
 
 The makeFunctor Functions
-
+---
 For each Functor class there are three versions of makeFunctor(), one for ptr-to-function and a const and non-const version for the object/ptr-to-member-function pair.
-
+```
 template <class P1,class TRT,class TP1>
 inline FunctionTranslator1<P1,TRT (*)(TP1)>
 makeFunctor(Functor1<P1>*,TRT (*f)(TP1))
-	{
+{
 	return FunctionTranslator1<P1,TRT (*)(TP1)>(f);
-	}
+}
+```
 The function version is straightforward. It uses the dummy argument to tell it the type of the functor and merely returns a corresponding FunctionTranslator. I mentioned above that the Func type parameter of FunctionTranslator was invariably a ptr-to-function type. This version of makeFunctor() ensures that by explicity specifying it as such.
-
+```
 template <class P1,class Callee,class TRT,class CallType,class TP1>
 inline MemberTranslator1<P1,Callee,TRT (CallType::*)(TP1)>
 makeFunctor(Functor1<P1>*,Callee &c,TRT (CallType::* const &f)(TP1))
@@ -487,11 +515,13 @@ makeFunctor(Functor1<P1>*,Callee &c,TRT (CallType::* const &f)(TP1))
 	typedef TRT (CallType::*MemFunc)(TP1);
 	return MemberTranslator1<P1,Callee,MemFunc>(c,f);
 	}
+```
 This is the gnarliest bit. Here makeFunctor is parameterized with the type of the argument to the Functor, the type of the callee, the type of the class of which the member-function is a member, the argument and return types of the member function. Whew! We're a long way from Stack<T> land! Like the ptr-to-function version, it uses the dummy first argument of the constructor to determine the type of the Functor. The second argument is a Callee object (by reference). The third argument is this thing:
 
-TRT (CallType::* const &f)(TP1)
-Here f is a reference to a constant pointer to a member function of CallType taking TP1 and returning TRT. You might notice that pointer-to-member-functions are all handled by reference in the library. On some implementations they can be expensive to pass by value and copy. The significant feature here is that the function need not be of type pointer-to-member-of-Callee. This allows makeFunctor to match on (and ultimately work with) a ptr-to-member-function of some base of Callee. It then typedefs that bit and returns an appropriate MemberTranslator.
+`TRT (CallType::* const &f)(TP1)`
 
+Here f is a reference to a constant pointer to a member function of CallType taking TP1 and returning TRT. You might notice that pointer-to-member-functions are all handled by reference in the library. On some implementations they can be expensive to pass by value and copy. The significant feature here is that the function need not be of type pointer-to-member-of-Callee. This allows makeFunctor to match on (and ultimately work with) a ptr-to-member-function of some base of Callee. It then typedefs that bit and returns an appropriate MemberTranslator.
+```
 template <class P1,class Callee,class TRT,class CallType,class TP1>
 inline MemberTranslator1<P1,const Callee,TRT (CallType::*)(TP1)const>
 makeFunctor(Functor1<P1>*,const Callee &c,TRT (CallType::* const &f)(TP1)const)
@@ -499,16 +529,17 @@ makeFunctor(Functor1<P1>*,const Callee &c,TRT (CallType::* const &f)(TP1)const)
 	typedef TRT (CallType::*MemFunc)(TP1)const;
 	return MemberTranslator1<P1,const Callee,MemFunc>(c,f);
 	}
+```
 This last variant just ensures that if the Callee is const the member function is also (note the const at the end of the third argument to the constructor - that's where it goes!).
 
 That, for each of ten Functors, is the whole implementation.
 
 Can Your Compiler Do This?
-
+---
 The callback library has been successfully tested with IBM CSet++ 2.01, Borland C++ 4.02 (no, its not twice as good ;-), and Watcom C++32 10.0. It is ARM compliant with the exception of expecting trivial conversions of template function arguments, which is the behavior of most compilers. I am interested in feedback on how well it works with other implementations.
 
 Summary
-
+------------------
 Callbacks are a powerful and necessary tool for component based object-oriented development in C++. They can be a tremendous aid to the interoperability of libraries. The template functor system presented here meets all the stated criteria for a good callback mechanism - it is object-oriented, compile-time type-safe, generic, non-type-intrusive, flexible and easy to use. It is sufficiently general to be used in any situation calling for callbacks. It can be implemented in the current language, and somewhat more elegantly in the proposed language.
 
 This implementation of callbacks highlights the power of C++ templates - their type-safety, their code-generation ability and the flexibility they offer by accepting ptr-to-function and ptr-to-member-function type parameters.
@@ -536,3 +567,5 @@ Rich is Technical Design Lead at Radio Computing Services, a leading software ve
 He can be reached at:
 rhickey@bestweb.net
 Home 
+
+> Written with [StackEdit](https://stackedit.io/).
