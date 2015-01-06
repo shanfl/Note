@@ -1,7 +1,7 @@
 
 CALLBACKS IN C++ USING TEMPLATE FUNCTORS
 ====
-Copyright 1994 Rich Hickey
+                               Copyright 1994 Rich Hickey
 
 [TOC]
 
@@ -12,8 +12,8 @@ One of the many promises of Object-Oriented programming is that it will allow fo
 Callbacks are in wide use, however current implementations differ and most suffer from shortcomings, not the least of which is their lack of generality. This article describes what callbacks are, how they are used, and the criteria for a good callback mechanism. It summarizes current callback methods and their weaknesses. It then describes a flexible, powerful and easy-to-use callback technique based on template functors - objects that behave like functions.
 
 CALLBACK FUNDAMENTALS
-----
-What Are Callbacks?
+--------------------
+###What Are Callbacks?
 
 When designing application or sub-system specific components we often know all of the classes with which the component will interact and thus explicity code interfaces in terms of those classes. When designing general purpose or library components however, it is often necessary or desirable to put in hooks for calling unknown objects. What is required is a way for one component to call another without having been written in terms of, or with knowledge of, the other component's type. Such a 'type-blind' call mechanism is often referred to as a callback.
 
@@ -25,7 +25,7 @@ Callbacks are useful in many contexts. If you use any commercial class libraries
 
 C++ is in fact quite flexible, and the mechanism presented here leverages its flexibility to provide this functionality without language extension. In particular, templates supply a powerful tool for solving problems such as this. If you thought templates were only for container classes, read on!
 
-Callback Terminology
+###Callback Terminology
 
 There are three elements in any callback mechanism - the caller, the callback function, and the callee.
 
@@ -35,7 +35,7 @@ A caller may require the callback for just the duration of one function, as with
 
 The callee is usually a member function of an object of some class, but it can also be a stand-alone function or static member function, that the application designer wishes to be called by the caller component. Note that in the case of a non-static member function a particular object/member-function pair is the callee. The function to be called must be compatible with the signature of the callback function specified by the caller.
 
-Criteria for a Good Callback Mechanism
+###Criteria for a Good Callback Mechanism
 
 A callback mechanism in the object oriented model should support both component and application design. Component designers should have a standard, off-the-shelf way of providing callback services, requiring no invention on their part. Flexibility in specifying the number and types of argument and return values should be provided. Since the component may be designed for use in as-yet-unthought-of applications, the component designer should neither need to know, nor dictate, the types of the objects which may be 'called back' by the component.
 
@@ -43,21 +43,21 @@ Application developers, given a component with this standard callback mechanism 
 
 To support this behavior the callback mechanism should be:
 
-Object Oriented - Our applications are built with objects. In a C++ application most functionality is contained in member functions, which cannot be invoked via normal ptr-to-functions. Non-static member functions operate upon objects, which have state. Calling such functions is more than just invoking a process, it is operating upon a particular object, thus an object-oriented callback must contain information about which object to call.
+<font color="0x0000ff">**Object Oriented**</font> - Our applications are built with objects. In a C++ application most functionality is contained in member functions, which cannot be invoked via normal ptr-to-functions. Non-static member functions operate upon objects, which have state. Calling such functions is more than just invoking a process, it is operating upon a particular object, thus an object-oriented callback must contain information about which object to call.
 
-Type Safe - Type safety is a fundamental feature and benefit of C++ and any robust C++ callback mechanism must be type safe. That means we must ensure that objects are used in compliance with their specified interfaces, and that type rules are enforced for arguments, return values, and conversions. The best way to ensure this is to have the compiler do the work at compile time.
+<font color="0x0000ff">**Type Safe**</font> - Type safety is a fundamental feature and benefit of C++ and any robust C++ callback mechanism must be type safe. That means we must ensure that objects are used in compliance with their specified interfaces, and that type rules are enforced for arguments, return values, and conversions. The best way to ensure this is to have the compiler do the work at compile time.
 
-Non-Coupling - This is the fundamental goal of callbacks - to allow components designed in ignorance of each other to be connected together. If the mechanism somehow introduces a dependancy between caller and callee it has failed in its basic mission.
+<font color="0x0000ff">**Non-Coupling**</font> - This is the fundamental goal of callbacks - to allow components designed in ignorance of each other to be connected together. If the mechanism somehow introduces a dependancy between caller and callee it has failed in its basic mission.
 
-Non-Type-Intrusive - Some mechanisms for doing callbacks require a modification to, or derivation of, the caller or callee types. The fact that an object is connected to another object in a particular application often has nothing to do with its type. As we'll see below, mechanisms that are type intrusive can reduce the flexibility and increase the complexity of application code.
+<font color="0x0000ff">**Non-Type-Intrusive**</font> - Some mechanisms for doing callbacks require a modification to, or derivation of, the caller or callee types. The fact that an object is connected to another object in a particular application often has nothing to do with its type. As we'll see below, mechanisms that are type intrusive can reduce the flexibility and increase the complexity of application code.
 
-Generic - The primary differences between different callback situations are the types involved. This suggests that the callback mechanism should be parameterized using templates. Templates insure consistent interfaces and names in all callback situations, and provide a way to have any necessary support code be generated by the compiler, not the user.
+<font color="0x0000ff">**Generic**</font> - The primary differences between different callback situations are the types involved. This suggests that the callback mechanism should be parameterized using templates. Templates insure consistent interfaces and names in all callback situations, and provide a way to have any necessary support code be generated by the compiler, not the user.
 
-Flexible - Experience has shown that callback systems that require an exact match between callback function and callee function signatures are too rigid for real-world use. For instance you may encounter a callback that passes a Derived * that you want to connect to a callee function that takes a Base *.
+<font color="0x0000ff">**Flexible**</font> - Experience has shown that callback systems that require an exact match between callback function and callee function signatures are too rigid for real-world use. For instance you may encounter a callback that passes a Derived * that you want to connect to a callee function that takes a Base *.
 
 CURRENT MECHANISMS
-
-Function Model
+------
+###Function Model
 
 The simplest callback mechanism is a pointer-to-function, a la ANSI C's qsort(). Getting a stand-alone function to act upon a particular object, however, usually involves kludges like using static or global pointers to indicate the target object, or having the callback function take an extra parameter (usually a pointer to the object to act upon). The static/global pointer method breaks down when the callback relationship exists across calls, i.e. 'I want to connect this Button to this X and this other Button to this other X, for the duration of the app'. The extra paramter method, if done type-safely, introduces undesirable coupling between the caller and callee types.
 
@@ -69,11 +69,11 @@ void apply(void (*func)(T &theItem,void *extraStuff),void *theStuff);
                             
 Chances are really good you don't have a function like func sitting around, so you'll have to write one (lots of casting required). And make sure you pass it the right stuff. Ugh.
 
-Single Rooted Hierarchy
+###Single Rooted Hierarchy
 
 Beware of callback mechanisms that appear type safe but are in fact not. These mechanisms usually involve some base-of-all-classes like Object or EventHandler, and utilize casts from ptr-to-member-of-derived to ptr-to-member-of-base. Experience has indicated that single-rooted systems are unworkable if components are to come from multiple sources.
 
-Parameterize the Caller
+###Parameterize the Caller
 
 The component designer could parameterize the component on the type of the callee. Such parameterization is inappropriate in many situations and callbacks are one of them. Consider:
 ```
@@ -114,7 +114,7 @@ If a component has many callback relationships it quickly becomes unworkable to 
 
 Library code cannot even create ButtonThatCallsBack objects because their instantiation depends on application types. This is a severe constraint. Consider GUI library code that reads a dialog description from a resource file and creates a Dialog object. How can it know that you want the Buttons in that Dialog to call back CDPlayers? It can't, therefore it can't create the Buttons for you.
 
-Callee Mix-In
+###Callee Mix-In
 
 The caller component designer can invent an abstract base class to be the target of the callback, and indicate to application developers that they mix-in this base in order to connect their class with the component. I call this the "callee mix-in."
 
@@ -371,8 +371,8 @@ Rounding out the functionality of the Functor classes are a default constructor 
 
 At this point you know everything you need to use the callback library. All of the code is in one file, callback.h. To use a callback in a component class, simply instantiate a Functor with the desired argument types. To connect some stuff to a component that uses Functors for callbacks, simply call makeFunctor() on the stuff. Easy.
 
-Power Templates
----
+###Power Templates
+
 As usual, what is easy for the user is often tricky for the implementor. Given the black-box descriptions above of the Functor classes and makeFunctor() it may be hard to swallow the claims of type-safety, transparent conversions, correct virtual function behavior etc. A look behind the curtain reveals not only how it works, but also some neat template techniques. Warning: most people find the pointer-to-member and template syntax used in the implementation daunting at first.
 
 Obviously some sort of magic is going on. How can the Functor class, with no knowledge of the type or signature of the callee, ensure a type safe call to it, possibly with implicit conversions of the arguments? It can't, so it doesn't. The actual work must be performed by some code that knows both the functor callback signature and everything about the callee. The trick is to get the compiler to generate that code, and have the Functor to point to it. Templates can help out all around.
@@ -389,8 +389,8 @@ All of this will become clearer with the details.
 
 For each of the 10 Functor classes there are 2 Translator classes and 3 versions of makeFunctor(). We'll examine a slice of the library here, Functor1 and its associated Translators and makeFunctors. The other Functors differ only in the number of args and return values.
 
-The Functors
----
+###The Functors
+
 Since the Functor objects are the only entities held by the caller, they must contain the data about the callee. With some care we can design a base class which can hold, in a typeless manner, the callee data, regardless of whether the callee is a ptr-to-function or object/ptr-to-member-function combo:
 ```
 //typeless representation of a function or object/mem-func
@@ -458,8 +458,8 @@ A key issue at this point is whether operator() should be virtual. In the first 
 
 In the current mechanism the Functor classes are concrete and the operator() is non-virtual. They can be treated and used just like ptr-to-functions. In particular, they can be stored by value in the component classes.
 
-The Translators
----
+###The Translators
+
 Where does the thunk() come from? It is generated by the compiler as a static member of a template 'translator' class. For each Functor class there are two translator classes, one for stand-alone functions (FunctionTranslator) and one for member functions (MemberTranslator). The translator classes are parameterized by the type of the Functor as well as the type(s) of the callee. With this knowledge they can, in a fully type-safe manner, perform two important tasks.
 
 First, they can initialize the Functor data. They do this by being publicly derived from the Functor. They are constructed with typed callee information and which they pass (untyped) to the functor's protected constructor.
@@ -495,8 +495,8 @@ MemberTranslator is parameterized by the argument type of the Functor, some clas
 
 Since the Translator objects are Functor objects, and fully 'bound' ones at that, they are suitable initializers for their corresponding Functor, using the Functor's copy constructor. We needn't worry about the 'chopping' effect since the data is all in the base class portion of the Translator class and there are no virtual functions involved. Thus they are perfect candidates for the return value of makeFunctor()!
 
-The makeFunctor Functions
----
+###The makeFunctor Functions
+
 For each Functor class there are three versions of makeFunctor(), one for ptr-to-function and a const and non-const version for the object/ptr-to-member-function pair.
 ```
 template <class P1,class TRT,class TP1>
@@ -569,3 +569,4 @@ rhickey@bestweb.net
 Home 
 
 > Written with [StackEdit](https://stackedit.io/).
+> [![](https://cdn.monetizejs.com/resources/button-32.png)](https://monetizejs.com/authorize?client_id=ESTHdCYOi18iLhhO&summary=true)
