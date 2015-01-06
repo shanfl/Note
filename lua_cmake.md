@@ -1,4 +1,4 @@
-cmake for lua 5.2.3
+CMakeFile For Lua 5.2.3
 =====
 ```
 project(lua_project)
