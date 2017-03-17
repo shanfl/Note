@@ -1,6 +1,6 @@
 ## cmake note
 - find_package
-```
+ ```
 As you may already know, pkg_search_module() relies on the pkg-config program in order to locate dependencies. As you point out, Windows doesn't come with pkg-config. You might be able to install it and get things working that way, but probably a better alternative for crossplatform builds is to use CMake's find_package() function instead. This way you can eliminate the dependency on having pkg-config installed on the developer's machine.
 
 cmake_minimum_required(VERSION 3.1)
