@@ -192,3 +192,49 @@ Application programs should use this general outline for interacting with MySQL:
 4. Close the connection to the MySQL server by calling mysql_close().
 
 5. End use of the MySQL client library by calling mysql_library_end().
+
+##### c api
+1. mysql_fetch_fields || mysql_fetch_field
+```
+    unsigned int num_fields;
+    unsigned int i;
+    MYSQL_FIELD *fields;
+    num_fields = mysql_num_fields(result);
+    fields = mysql_fetch_fields(result);
+    for(i = 0; i < num_fields; i++)
+    {
+        printf("Field %u is %s\n", i, fields[i].name);
+    }
+```
+```
+	//指向  mysql 的查询字段集
+	MYSQL_FIELD *fieldptr = NULL;
+
+	//取得各字段名和类型
+	while ((fieldptr = mysql_fetch_field(m_resultptr)))
+	{
+		typeset_t typeset;
+		typeset.index = m_fieldtype.size();
+		typeset.length = fieldptr->length;
+		typeset.name = fieldptr->name;
+		typeset.type = SetFieldType(fieldptr->type);
+		m_fieldtype.push_back(typeset);
+	}
+```
+2. 
+
+##### 存储过程
+
+1. 查看存储过程:
+```
+    1.select  `name` from mysql.proc where `db` =  your_db_name  and  `type`  = 'PROCEDURE'
+    2.show procedure status;
+```
+2. 查看存储过程代码:
+```
+    show create procedure proc_name;
+    show create function func_name;
+```
+
+
+##### 增删改查CRUD
