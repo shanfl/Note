@@ -55,17 +55,29 @@
 
     29. git checkout -b version2 v2.0.0 // 创建分支version2 对应tag:v2.0.0
 
-### Part 2. Branch
-    1. git branch [branch-name]  // 创建分支
-    2. git checkout [branch-name] // 切换分支
-    3. git 
+#### Part 2. Branch
+    1. git branch [branch-name]     // 创建分支
+    2. git checkout [branch-name]   // 切换分支
+    
+    //TODO::
+    3. git merge [anthor-banch]     // 
+    4. git log --oneline --decorate // --decorate
+    5. git branch -d issue1001
+    6. git mergetool
+    7. git branch   // 列出所有的分支
+    8. git branch -v  // 列出所有分支的最新提交信息
+    9. git branch --merged              // 列出已经合并到当前分支的分支列表
+    10. git branch --no-merged          // 列出没有合并到当前分支的分支列表
+    11. git push origin --delete serverfix  // 删除 origin 仓库的serverfix分支
+    12. git 
 ----
 - remove untracked files/directories
-	```
+
+```
 	git clean -fdx
         -f force
         -d dictories
         -x remove ignored files too
         -n preview before remove
         -i for interactive
-    ```
+```
