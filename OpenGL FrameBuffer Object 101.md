@@ -1,12 +1,14 @@
-##OpenGL FrameBuffer Object 101 
+## OpenGL FrameBuffer Object 101
+=====   
 by Rob 'phantom' Jones
-####Introduction
+----  
+####  Introduction
 
 The Frame Buffer Object (FBO) extension was introduced to make Render to Texture objects much more efficient and much easier to perform when compared with the copying or pbuffer alternatives.
 
 In this little article I’m going to give you a quick over view of how to use this extension and some things to keep in mind when using it so you can add faster Render to Texture functionality to your OpenGL programs.
 
-####Setting Up
+####  Setting Up
 
 As with the other objects in OpenGL (texture object, pixel buffer objects and vertex buffer object) before you can use a FBO you have to create a valid handle to it:
 ```
@@ -18,7 +20,7 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);```
 The first parameter is the ‘target’ you wish to bind the framebuffer to, right now the only target you can use is the one indicated above however it is possible future extensions might allow you to bind it somewhere else. The fbo variable holds the handle to the FBO we requested earlier. To perform any FBO related operations you need to have a FBO bound or the calls will fail.
 
 
-####Adding a Depth Buffer
+#### Adding a Depth Buffer
 
 A FBO on its own isn’t of much use, for it to be usable you have to attach some renderable objects to it; these can be textures or the newly introduced renderbuffers.
 
@@ -46,7 +48,7 @@ glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_REN
 While it might look a bit imposing the function is pretty easy to understand; all it is doing is attaching the depthbuffer we created earlier to the currently bound FBO to its depth buffer attachment point.
 
 
-####Adding a Texture To Render To
+#### Adding a Texture To Render To
 
 At this point we still don’t have a way of writing colour information to the FBO, so that is what we are going to add now. There are two ways of going about it:
 - Attach a colour Renderbuffer to the FBO
@@ -76,7 +78,7 @@ GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);```
 If all has gone well then status will equal **GL_FRAMEBUFFER_COMPLETE_EXT** and your FBO is ready to be rendered to. Other error codes, as found in the spec, indicate other problems which might well have occurred when you tried to setup the FBO.
 
 
-####Rendering to Texture
+#### Rendering to Texture
 
 With all the hard work setting things up done the usage of the FBO from here on out is in fact pretty simple and relies on just one function call: glBindFramebufferEXT().
 
@@ -97,7 +99,7 @@ Three lines which probably jumped out at you right away are the glPushAttrib/glP
 An important point to make here is that you’ll notice that we only bound and then unbound the FBO to draw to it, we didn’t reattach any textures or renderbuffers, this because they stay attached until you detach them yourself or the FBO is destroyed.
 
 
-####Using The Rendered To Texture
+#### Using The Rendered To Texture
 
 At this point our scene has been rendered to the texture and is now ready for us to use it and this operation itself is easy; we just bind the attached texture like any other texture.
 ```
@@ -116,6 +118,7 @@ OpenGL will then generate all the required mipmap data for you so that your text
 It’s important to note that if you intend on using any of the mipmap filters (GL_LINEAR_MIPMAP_LINEAR for example) then you must call glGenerateMipmapEXT() before checking the framebuffer is complete or attempting to render to it.
 
 At setup time you can just do it as follows:
+
 ```
 glGenTextures(1, &img);
 glBindTexture(GL_TEXTURE_2D, img);
@@ -124,19 +127,23 @@ glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-glGenerateMipmapEXT(GL_TEXTURE_2D);```
+glGenerateMipmapEXT(GL_TEXTURE_2D);
+```
+
 At this point your texture is complete and can be rendered to like normal.
 
-####Cleaning Up
+#### Cleaning Up
 Finally, when you are done with your FBO you need to clean things up and delete it. This, like textures, is done via a single function:
-```
-glDeleteFramebuffersEXT(1, &fbo);```
+
+`glDeleteFramebuffersEXT(1, &fbo);`
+
 You also have to clean up any renderbuffers you might have allocated, in this case the depthbuffer renderbuffer needs to deleted, which again works the same way as cleaning up a texture:
-```
-glDeleteRenderbuffersEXT(1, &depthbuffer);```
+
+`glDeleteRenderbuffersEXT(1, &depthbuffer);`
+
 At this point both the FBO and the renderbuffer have been freed and your clean up is completed.
 
-####Final Thoughts
+#### Final Thoughts
 
 Hopefully this quick tour of the FBO extension will be enough to get you up and running with it. For a more detailed over view you'll want to check out the FBO spec or the section on the extension in the book More OpenGL Game Programming
 
@@ -146,9 +153,9 @@ In way of closing, before you go and check out the example program which shows a
 - Don’t constantly make the destroy FBOs, instead generate what you need at load/setup time and reuse them during the program as required.
 - Avoid modifying the texture you have rendered to via any glTexImage and related calls. Doing so can and most probably will hurt your performance.
 
-####Notes on the example program
+#### Notes on the example program
 
-While this article talks about adding a depth renderbuffer and then a texture to the FBO in that order it was discovered that currently ATI’s drivers appear to have a bug whereby adding the depth renderbuffer and then a texture causes the application to crash. This should be kept in mind when doing any FBO related work and tested for as it is possible it could be fixed in a future driver revision thus rendering the problem non-existent.
+While this article talks about adding a depth renderbuffer and then a texture to the FBO in that order it was discovered that currently ATI’s drivers appear to have a bug whereby adding the depth renderbuffer and then a texture causes the application to crash. This should be kept in mind when doing any FBO related work and tested for as it is possible it could be fixed in a future driver revision thus rendering the problem non-existent.  
 
 I’d also like to put out a big thanks to Rick Appleton for helping me test out and debug the code on NVIDA hardware, couldn’t have done it without you mate :)
 
