@@ -25,7 +25,7 @@
 
   > `val exp:Int = 5`
 
-#####  编译时常量  `const val MAX_EXP :Int = 5
+#####  编译时常量  `const val MAX_EXP :Int = 5`
 
 #####  tip: 查看字节码:idea 中 输入 `show kotlin` 
 
