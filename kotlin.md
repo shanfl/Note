@@ -751,14 +751,116 @@ class Player(   _name:String,
 
 ##### 属性初始化
 
+```kotlin
+class Player(   _name:String,
+                var healthPoint:Int = 100,
+                var isBlessed:Boolean,
+                private val isImmortal:Boolean) {
+    var name = _name
+        get() = "${field.capitalize()} of $hometown";
+        private set(value){
+            field = value.trim() + "z123123";
+        }
+
+    //var healthPoint = _healthPoint
+    //var isBlessed = _isBlessed
+    //private val isImmortal = _isImmortal
+
+    constructor(name: String) : this(
+                    name,
+                    //healthPoint = 100,
+                    isBlessed = true,
+                    isImmortal = false)
+    {
+        if(name.toLowerCase() == "kar") healthPoint = 40;
+    }
+
+    init {
+        require(healthPoint > 0,{"healthPoint must be greater than zero"})
+        require(name.isNotBlank(),{"player shoule has a name"})
+    }
+
+    // 属性初始化
+    // var hometown:String; // error
+    // var hometown :String = ""; //
+    // var hometown
+    var hometown = selectHometown();
+    private fun selectHometown() = File("data/towns.txt")
+            .readText()
+            .split("\n")
+            .shuffled()
+            .first();
+
+	...
+}
+```
+
+
+
 ##### 初始化顺序
 
-##### 延迟初始化
+##### 延迟初始化 ：` lateinit 只用于变量 var，而 lazy 只用于常量 val`
 
-1. 延迟初始化
-2. 惰性初始化
+> 如 android 的Activity启动 ，可以在onCreate的时候进行需要的赋值，初始化
 
-##### 初始化陷阱
+1. 延迟初始化 `lateinit`
+
+2. 惰性初始化 `by`   如：`by lazy{}`
+
+   ```kotlin
+   import java.io.File;
+   
+   class Player(   _name:String,
+                   var healthPoint:Int = 100,
+                   var isBlessed:Boolean,
+                   private val isImmortal:Boolean) {
+       var name = _name
+           get() = "${field.capitalize()} of $hometown";
+           private set(value){
+               field = value.trim() + "z123123";
+           }
+   
+       //var healthPoint = _healthPoint
+       //var isBlessed = _isBlessed
+       //private val isImmortal = _isImmortal
+   
+       lateinit var alignment:String;
+   
+       constructor(name: String) : this(
+                       name,
+                       //healthPoint = 100,
+                       isBlessed = true,
+                       isImmortal = false)
+       {
+           if(name.toLowerCase() == "kar") healthPoint = 40;
+       }
+   
+       init {
+           require(healthPoint > 0,{"healthPoint must be greater than zero"})
+           require(name.isNotBlank(),{"player shoule has a name"})
+       }
+   
+       // 属性初始化
+       // var hometown:String; // error
+       // var hometown :String = ""; //
+       // var hometown
+       //var hometown = selectHometown();
+       var hometown by lazy{selectHometown()}   //
+       
+       private fun selectHometown() = File("data/towns.txt")
+               .readText()
+               .split("\n")
+               .shuffled()
+               .first();
+   	...
+   }
+   
+   
+   ```
+
+   
+
+##### 初始化陷阱 : 类属性放置顺序要注意
 
 #### 14 继承
 
@@ -766,11 +868,70 @@ class Player(   _name:String,
 
 ##### 创建子类
 
-##### 类型检测
+```kotlin
+// 如果允许被继承，就+open
+open class Room(val name:String)
+{
+    protected open val dangerLevel = 5;
+
+    fun description() =
+            "Room: $name"
+
+    // 要想被override 就需要open
+    open fun load() =
+            "Nothing much to see here ..."
+
+
+}
+
+class TownSquare:Room("Town Square")
+{
+    override val dangerLevel = super.dangerLevel - 3;
+    private var bellSound = "GWONG";
+
+    // load cant be overrided by subclass
+    final override fun load() =
+            "The villageers rally and cheer as you enter"
+
+    private fun ringBell() =
+            "The bell tower announces your arrival. $bellSound"
+
+
+}
+
+```
+
+
+
+##### 类型检测 `is`
+
+​	
 
 ##### Kotlin中的类层次
 
+```
+any => java.lang.Object
+```
+
+
+
 1. 类型转换
+
+   ```
+   fun printIsSourceOfBlessings(any:Any)
+   {
+   	val isSourceOfBlessings = if(any is Player){
+   		any.isBlessed
+   	}else
+   	{
+   		(any as Room).name == "Fount of Blessing"
+   	}
+   	println($any is a source of blessings: $isSourceOfBlessings)
+   }
+   ```
+
+   
+
 2. 智能类型转换
 
 ##### Any深入
