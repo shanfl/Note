@@ -447,23 +447,116 @@ var b = readline()?:"is NUll !!!!!"
 
 ##### 类的定义
 
+```kotlin
+class Player {
+    fun castFireBall(numFireball:Int = 2) =
+            println("A glass of FireBall springs into existence. (x$numFireball)")
+}
+```
+
+
+
 ##### 类的实例化
 
 ##### 类函数
 
 ##### 可见性&封装
 
+1. 可见性修饰符
+
+   - public
+   - private
+   - protected
+   - internal  函数/属性 只在同意模块内可见
+
+   
+
 ##### 类属性
 
+```kotlin
+class Player {
+    val name = "madrigal"
+    var healthPoint = 50
+    fun castFireBall(numFireball:Int = 2) =
+            println("A glass of FireBall springs into existence. (x$numFireball)")
+}
+```
+
+
+
 1. getter & setter
+
 2. 属性可见性
+
 3. 计算属性
+
+   ```kotlin
+   class Player {
+       var name = "madrigal"
+           get() = field.capitalize();					//setter getter
+           private set(value){							// 属性可见性
+               field = value.trim() + "z123123";
+           }
+   
+       var healthPoint = 50
+   
+       fun castFireBall(numFireball:Int = 2) =
+               println("A glass of FireBall springs into existence. (x$numFireball)")
+   }
+   
+   class Dice()
+   {
+       val rollValue
+           get() = (1..6).shuffled().first();			// 计算属性
+   }
+   ```
+
+   
 
 #####  `包`
 
 ##### 深入： 细看 var 与 val 属性
 
 ##### 深入： 防范竟态条件
+
+```kotlin
+class Weapon(val nameL:String)
+{
+    var name:String = "none"
+}
+
+class Player {
+    var name = "madrigal"
+        get() = field.capitalize();
+        private set(value){
+            field = value.trim() + "z123123";
+        }
+
+    var healthPoint = 50
+
+    var weapon:Weapon? = Weapon("Ebony Kris")
+
+    fun printWeaponName()
+    {
+        if (weapon != null)
+            weapon?.also { println(it.name) }
+
+        //if(weapon != null)
+        //    println(weapon.name);  //Smart cast to 'Weapon' is impossible, because 'weapon' is a mutable property that could have been changed by this time
+    }
+
+    fun castFireBall(numFireball:Int = 2) =
+            println("A glass of FireBall springs into existence. (x$numFireball)")
+}
+
+class Dice()
+{
+    val rollValue
+        get() = (1..6).shuffled().first();
+}
+```
+
+
 
 ##### 深入：私有包
 
@@ -473,14 +566,188 @@ var b = readline()?:"is NUll !!!!!"
 
 1. 主构造函数
 
+   ```kotlin
+   class Weapon(val nameL:String)
+   {
+       var name:String = "none"
+   }
+   
+   class Player(   _name:String,
+                   _healthPoint:Int,
+                   _isBlessed:Boolean,
+                   _isImmortal:Boolean) {
+       var name = _name
+           get() = field.capitalize();
+           private set(value){
+               field = value.trim() + "z123123";
+           }
+   
+       var healthPoint = _healthPoint
+       var isBlessed = _isBlessed
+       private val isImmortal = _isImmortal
+   
+       var weapon:Weapon? = Weapon("Ebony Kris")
+   
+       fun printWeaponName()
+       {
+           if (weapon != null)
+               weapon?.also { println(it.name) }
+   
+           //if(weapon != null)
+           //    println(weapon.name);  //Smart cast to 'Weapon' is impossible, because 'weapon' is a mutable property that could have been changed by this time
+       }
+   
+       fun castFireBall(numFireball:Int = 2) =
+               println("A glass of FireBall springs into existence. (x$numFireball)")
+   }
+   
+   ```
+
+   
+
 2. 在主构造函数里定义属性
 
-3. 次构造函数
+   ```kotlin
+   class Weapon(val nameL:String)
+   {
+       var name:String = "none"
+   }
+   
+   class Player(   _name:String,
+                   var healthPoint:Int,
+                   var isBlessed:Boolean,
+                   private val isImmortal:Boolean) {
+       var name = _name
+           get() = field.capitalize();
+           private set(value){
+               field = value.trim() + "z123123";
+           }
+   
+       //var healthPoint = _healthPoint
+       //var isBlessed = _isBlessed
+       //private val isImmortal = _isImmortal
+   
+       var weapon:Weapon? = Weapon("Ebony Kris")
+   
+       fun printWeaponName()
+       {
+           if (weapon != null)
+               weapon?.also { println(it.name) }
+   
+           //if(weapon != null)
+           //    println(weapon.name);  //Smart cast to 'Weapon' is impossible, because 'weapon' is a mutable property that could have been changed by this time
+       }
+   
+       fun castFireBall(numFireball:Int = 2) =
+               println("A glass of FireBall springs into existence. (x$numFireball)")
+   }
+   ```
+
+   
+
+3. 次构造函数,最终都要走到 主构造函数中 
+
+   ```kotlin
+   class Player(   _name:String,
+                   var healthPoint:Int,
+                   var isBlessed:Boolean,
+                   private val isImmortal:Boolean) {
+       var name = _name
+           get() = field.capitalize();
+           private set(value){
+               field = value.trim() + "z123123";
+           }
+   
+   
+       constructor(_name: String) : this(  
+                       _name, 
+                       healthPoint = 100,  // 命名参数
+                       isBlessed = true, 
+                       isImmortal = false)
+   
+   	....
+   }
+   
+   ```
+
+   
 
 4. 默认参数
-5. 命名参数
 
-##### 初始化块
+   ```kotlin
+   class Player(   _name:String,
+                   var healthPoint:Int = 100,
+                   var isBlessed:Boolean,
+                   private val isImmortal:Boolean) {
+       var name = _name
+           get() = field.capitalize();
+           private set(value){
+               field = value.trim() + "z123123";
+           }
+   
+       //var healthPoint = _healthPoint
+       //var isBlessed = _isBlessed
+       //private val isImmortal = _isImmortal
+   
+       constructor(name: String) : this(
+                       name,
+                       //healthPoint = 100,
+                       isBlessed = true,
+                       isImmortal = false)
+       {
+           if(name.toLowerCase() == "kar") healthPoint = 40;
+       }
+   
+   	...
+   }
+   
+   ```
+
+   
+
+5. 命名参数 ` 查看上例 已经用上了`
+
+##### 初始化块  `init{}`
+
+> 初始化块 在构造类实例时进行
+
+```kotlin
+
+class Player(   _name:String,
+                var healthPoint:Int = 100,
+                var isBlessed:Boolean,
+                private val isImmortal:Boolean) {
+    var name = _name
+        get() = field.capitalize();
+        private set(value){
+            field = value.trim() + "z123123";
+        }
+
+    //var healthPoint = _healthPoint
+    //var isBlessed = _isBlessed
+    //private val isImmortal = _isImmortal
+
+    constructor(name: String) : this(
+                    name,
+                    //healthPoint = 100,
+                    isBlessed = true,
+                    isImmortal = false)
+    {
+        if(name.toLowerCase() == "kar") healthPoint = 40;
+    }
+
+    // 初始化块  `init{}`
+    init {
+        require(healthPoint > 0,{"healthPoint must be greater than zero"})
+        require(name.isNotBlank(),{"player shoule has a name"})
+    }
+
+	...
+}
+
+```
+
+
 
 ##### 属性初始化
 
