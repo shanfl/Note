@@ -2,7 +2,7 @@
 
 -----
 
-------------- kotlin权威编程指南(Kotlin Progamming - the big nerd ranch guide)
+ kotlin权威编程指南(Kotlin Progamming - the big nerd ranch guide)
 
 #### 2. 变量,常量,类型
 
@@ -435,13 +435,207 @@ var b = readline()?:"is NUll !!!!!"
 
 #### 7 字符串
 
+- `indexOf`
+
+- `substring`
+
+- split->List
+
+- replace
+
+  ```kotlin
+      val str_reg = "Hello World,Kotlin!,You are welcome"
+      val newStr = str_reg.replace(Regex("[aeiou]")){
+          when(it.value)
+          {
+              "a"->"4"
+              "e"->"3"
+              "i"->"2"
+              "o"->"|_|"
+              "u"->"^_^"
+              else->it.value
+          }
+      }
+  ```
+
+-  `==`    `===`
+
+- ```kotlin
+  "abdcdefg".forEach{
+  	println("$it\n")
+  }
+  ```
+
+  
+
 #### 8 数
+
+- string 2 number
+  - toFloat
+  -  toDouble 
+  - toDoubleOrNull 
+  - toIntorNull 
+  - toLong 
+  - toBigDecimal
+- 位运算
+  - Interger.toBinaryString(42)
 
 #### 9 标准库函数
 
+- apply
+
+  ```kotlin
+  //    val numFile = File("menu_file.txt");
+  //    numFile.setExecutable(true);
+  //    numFile.setReadable(true)
+  //    numFile.setWritable(true)
+      
+      val numfile = File("menu-file.txt").apply{
+          setReadable(true);
+          setWritable(true);
+          setExecutable(true);
+      }
+  ```
+
+- let
+
+  ```kotlin
+  //    val t1 = listOf(1,2,3).first();
+  //    val fisrtValue = t1*t1;
+  
+      val fisrtValue = listOf(1,2,3).first().let { it*it};
+  ```
+
+   ```kotlin
+  fun formatGreeting(vipGuset:String?):String {
+      return vipGuset ?.let { "Welcome $it" } ?: " get out ,sb"
+  }
+   ```
+
+- run  , 与apply 相比,run函数不返回接收者,返回lambda 结果
+
+  ```kotlin
+      val nuFile = File("menu_file.txt")
+      val ret = nuFile.run {
+          readText().contains("Dragons")
+      }
+  ```
+
+- with
+
+- also  also 返回接收者,let 返回lambda结果
+
+  ```kotlin
+      var fileContains:List<String>
+      File("file.txt")
+              .also { println(it.name) }
+                  .also { fileContains = it.readLines() }
+  ```
+
+- takeIf
+
+  > takeIf 需要判断lambda中提供的条件表达式(predicate),给出true/false的结果,如果是true,从takeIf函数返回接收者对象,如果是false,返回null
+
+- takeUnless
+
+- 总结
+
+  
+
+|    函数    | 是否传receiver值参给lambda | 是否有相关作用域 |     返回     |
+| :--------: | :------------------------: | :--------------: | :----------: |
+|    let     |             是             |        否        |  lambda结果  |
+|   apply    |             否             |        是        |   receiver   |
+|    run     |             否             |        是        |    lambda    |
+|    with    |             否             |        是        |    lambda    |
+|    also    |             是             |        否        |   receiver   |
+|   takeIf   |             是             |        否        | 可空receiver |
+| takeUnless |             是             |        否        | 可空receiver |
+
+
+
 #### 10 List 与 Set
 
+- list
+
+  - listOf
+
+  - [index]
+
+  - getOrElse
+
+    ```kotlin
+    println("s[4] = ${s.getOrElse(4){"out of range "}}")
+    ```
+
+  - contains("str")
+
+  - modify
+
+    - remove
+    - add
+    - mutableListOf `var aList = mutableListOf("Eli","Able","fakeer")`
+    - [] = ""
+    - addAll
+    - +=/-=
+    - clear
+    - removeIf
+
+  - 遍历
+
+    - ```kotlin
+      for (par in parList){ ... }
+      ```
+
+    - ```kotlin
+      parlist.forEach{par -> ...}
+      ```
+
+    - `forEacheIndexed`
+
+- set
+
+  - setOf / mutableSetOf
+
+  | 函数      | 描述 | 示例 |
+  | :-------- | :--: | ---: |
+  | add       |      |      |
+  | addAll    |      |      |
+  | +=/-=     |      |      |
+  | remove    |      |      |
+  | removeAll |      |      |
+  | clear     |      |      |
+
+集合转换
+
+- toList  / toSet
+
 #### 11 Map
+
+- map存取
+
+  | 函数         | 描述 | 示例 |
+  | ------------ | ---- | ---- |
+  | []           |      |      |
+  | getValue     |      |      |
+  | getOrElse    |      |      |
+  | getOrDefault |      |      |
+
+- mutator 函数
+
+  | 函数     | 描述 | 示例 |
+  | -------- | ---- | ---- |
+  | =        |      |      |
+  | +=       |      |      |
+  | put      |      |      |
+  | putAll   |      |      |
+  | getOrPut |      |      |
+  | remove   |      |      |
+  | -        |      |      |
+  | -=       |      |      |
+  | clear    |      |      |
+
+  
 
 #### 12 定义类
 
@@ -975,9 +1169,87 @@ any => java.lang.Object
 
 ##### 1. 泛型类 定义
 
+```kotlin
+class LootBox<T>(item:T)
+{
+    var open= true;
+    private var loot:T = item;
+
+
+}
+```
+
+
+
 ##### 2. 泛型函数
 
+```kotlin
+class LootBox<T>(item:T)
+{
+    var open= true;
+    private var loot:T = item;
+
+    fun fetch():T?
+    {
+        return loot.takeIf { open }
+    }
+}
+
+class LootBox2<T>(var mItem:T)
+{
+
+}
+
+class Fedora(val name:String,val value:Int)
+
+class Coin(val value:Int)
+
+fun TestGeneric()
+{
+    val lootboxone:LootBox<Fedora> = LootBox(Fedora("A generic-looking fedora",15))
+    val lootboxtwo:LootBox<Coin> = LootBox(Coin(3))
+
+    // run 函数会将lootboxone实例作用于它所接受的lambda表达式中,所以$name 能获取Fedora类的name 属性
+    lootboxone.fetch()?.run { println("you retieeve $name from the box ") }
+
+}
+```
+
+
+
 ##### 3. 多泛型参数
+
+```kotlin
+class LootBox<T>(item:T)
+{
+    var open= true;
+    private var loot:T = item;
+
+    fun fetch():T?
+    {
+        return loot.takeIf { open }
+    }
+	
+	// 多泛型参数
+    fun<RT> fetch(lootModFunction:(T)->RT):RT?{
+        return lootModFunction(loot).takeIf { open };
+    }
+}
+
+class Fedora(val name:String,val value:Int)
+
+class Coin(val value:Int)
+
+fun TestGeneric() {
+    val lootboxone: LootBox<Fedora> = LootBox(Fedora("A generic-looking fedora", 15))
+    
+    // 从Fedora类中,返回了一个 Coin类的实例
+    val coin = lootboxone.fetch() { Coin(it.value * 3) }
+    coin?.let { println(it.value) }
+}
+```
+
+
 
 ##### 4. 泛型约束
 
