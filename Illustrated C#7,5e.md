@@ -262,11 +262,11 @@ System.Console.Write("Hello world")
 
 ### 4.10　静态类型和dynamic 关键字　41
 
-### 4.11　可空类型　42
+### 4.11　可空类型
 
 ## 第5　章 类的基本概念　43
 
-### 5.1　类的概述　43
+### 5.1　类的概述
 
 ### 5.2　程序和类：一个简单的示例　44
 
@@ -278,13 +278,35 @@ System.Console.Write("Hello world")
 
 #### 5.4.2　方法　47
 
-### 5.5　创建变量和类的实例　48
+### 5.5　创建变量和类的实例
+
+```c#
+new ClassName();
+
+MyClass = new MyClass();
+```
+
+
 
 ### 5.6　为数据分配内存　48
 
-### 5.7　实例成员　49
+### 5.7　实例成员
 
-### 5.8　访问修饰符　50
+- 实例成员
+- 静态成员
+
+### 5.8　访问修饰符
+
+```c#
+private
+public
+protected
+internal
+protected internal
+```
+
+- 不带访问修饰符 即为私有成员
+- 私有成员只能从声明它的类的内部使用,其他类看不到
 
 ### 5.9　从类的内部访问成员　52
 
@@ -300,101 +322,332 @@ System.Console.Write("Hello world")
 
 ### 6.3　局部变量　58
 
-#### 6.3.1　类型推断和var 关键字　59
+#### 6.3.1　类型推断和var 关键字
 
-#### 6.3.2　嵌套块中的局部变量　59
+> - 用于局部变量,不能用于成员变量(字段)
+> - 必须有初始化值
 
-### 6.4　局部常量　60
+#### 6.3.2　嵌套块中的局部变量
 
-### 6.5　控制流　61
+> 与c/c++ 不同,更深层级块中,不能再声明上层块已经有的变量名了.
 
-### 6.6　方法调用　62
+### 6.4　局部常量
 
-### 6.7　返回值　63
+`const Type Name = Value`
 
-### 6.8　返回语句和void 方法　64
+### 6.5　控制流
 
-### 6.9　局部函数　66
+```c#
+if if ... else
+switch
+for while do  foreach
+break continue goto return
+```
 
-### 6.10　参数　66
+
+
+### 6.6　方法调用
+
+### 6.7　返回值
+
+### 6.8　返回语句和void 方法
+
+### 6.9　局部函数
+
+### 6.10　参数
+
+> 
 
 #### 6.10.1　形参　67
 
-#### 6.10.2　实参　67
+> 形参是局部变量,它声明在方法的参数列表中,而不是在方法体中
 
-### 6.11　值参数　69
+#### 6.10.2　实参
 
-### 6.12　引用参数　71
+### 6.11　值参数
 
-### 6.13　引用类型作为值参数和引用参数　73
+### 6.12　引用参数
 
-### 6.14　输出参数　76
+```
+            void myMethod(ref int a)
+            {
+                
+            }
+```
 
-### 6.15　参数数组　79
+> 引用参数的几个特征:
+>
+> - 不会在栈上为形参分配内存
+> - 形参的参数名 将作为实参变量的别名,指向相同的内存地址
+> - 使用引用参数时,必须在方法的声明和调用中 使用 `ref` 修饰符
+> - 实参必须是变量
 
-#### 6.15.1　方法调用　80
+### 6.13　引用类型作为值参数和引用参数
 
-#### 6.15.2　将数组作为实参　82
 
-### 6.16　参数类型总结　83
 
-### 6.17　ref 局部变量和ref 返回　83
+### 6.14　输出参数
 
-### 6.18　方法重载　86
+```C#
+            MyOutMethod(out int a ,out MyClass aclass);
+            aclass.val = 10000;
+```
 
-### 6.19　命名参数　87
+> C#7开始,无须提前声明out变量,可以直接在调用函数中直接声明变量
 
-### 6.20　可选参数　88
+### 6.15　参数数组
 
-### 6.21　栈帧　91
+> 一个参数列表里,只能有一个,而且排在最后
 
-### 6.22　递归　93
 
-## 第7　章 深入理解类　95
 
-### 7.1　类成员　95
+```c#
+        static void ParamsFunc(params int[] inVals)
+        {
 
-### 7.2　成员修饰符的顺序　96
+        }
+		ParamsFunc(1,3,4,5,6,7)
+```
 
-### 7.3　实例类成员　97
 
-### 7.4　静态字段　98
 
-### 7.5　从类的外部访问静态成员　98
+#### 6.15.1　方法调用
+
+#### 6.15.2　将数组作为实参
+
+### 6.16　参数类型总结
+
+| 参数类型 | 修饰符 | 是否在声明时使用 | 是否在调用时使用 | 执行 |
+| -------- | ------ | ---------------- | ---------------- | ---- |
+| 值       |        |                  |                  |      |
+| 引用     | ref    | 是               | 是               |      |
+| 输出     | out    | 是               | 是               |      |
+| 数组     | params | 是               | 是               |      |
+
+
+
+### 6.17　ref 局部变量和ref 返回
+
+- 创建别名
+
+  ```c#
+  ref int y  = ref x;
+  ```
+
+- ref 返回
+
+  ```C#
+  
+          class Simple
+          {
+              private int score = 10;
+  
+  
+              public ref int retvalue()
+              {
+                  return ref score;
+              }
+          }
+          
+          ...
+  		ref int mf = ref sim.retvalue();
+          mf = 1000;
+  ```
+
+  > ref return 只能指向原先就在调用域内的位置或者字段,不能指向方法内的局部变量
+  >
+  > ```c#
+  > class B
+  > {
+  > 	long addValue(long a ,long b);
+  > 	int addValue(long a ,long b);	// error 相同的签名
+  > }
+  > ```
+  >
+  > 
+
+  
+
+### 6.18　方法重载
+
+> 方法名相同,但是签名不同
+
+>  签名:
+>
+> - 方法的名称
+> - 参数的数目
+> - 参数的数据类型和顺序
+> - 参数修饰符
+
+返回类型不是签名的一部分
+
+### 6.19　命名参数
+
+```c#
+        static void Fnc(int a, int b,int c)
+        {
+            Console.WriteLine($"{a} , {b},  {c}");
+        }
+        
+        Fnc(b:1,c:10,a:3300);
+```
+
+
+
+### 6.20　可选参数
+
+```C#
+static void Func(int a,int b,int c = 1)
+{
+	...
+}
+```
+
+
+
+### 6.21　栈帧
+
+### 6.22　递归
+
+## 第7　章 深入理解类
+
+### 7.1　类成员
+
+| 数据成员 | 函数成员          |
+| -------- | ----------------- |
+| 字段     | 方法              |
+| 常量     | 属性              |
+|          | 构造函数/析构函数 |
+|          | 运算符            |
+|          | 索引              |
+|          | 事件              |
+
+
+
+### 7.2　成员修饰符的顺序 
+
+> ```c
+> [特性] [修饰符] 核心声明
+> ```
+
+
+
+| 声明类型 | 特性 | 修饰符                      | 核心声明                    |
+| -------- | ---- | --------------------------- | --------------------------- |
+| 字段声明 |      | public/private/static/const | type fieldname              |
+|          |      |                             |                             |
+|          |      |                             |                             |
+| 方法声明 |      | public/private/static       | [returntype] fun(paramlist) |
+
+
+
+
+
+### 7.3　实例类成员
+
+### 7.4　静态字段
+
+### 7.5　从类的外部访问静态成员
 
 #### 7.5.1　静态字段示例　99
 
-#### 7.5.2　静态成员的生存期　100
+#### 7.5.2　静态成员的生存期
 
-### 7.6　静态函数成员　101
+### 7.6　静态函数成员
 
-### 7.7　其他静态类成员类型　102
+### 7.7　其他静态类成员类型
 
-### 7.8　成员常量　102
+### 7.8　成员常量
+
+```
+        class X
+        {
+            public const int cv = 100;
+        }
+```
+
+
 
 ### 7.9　常量与静态量　103
 
-### 7.10　属性　103
+### 7.10　属性
 
-#### 7.10.1　属性声明和访问器　104
+> - 类成员
+> - 有类型
+> - 可以赋值和取值
+> - 不是字段,是成员函数
+> - 不一定有他的内存空间
+> - 执行代码
+> - 访问器 set get
 
-#### 7.10.2　属性示例　105
+#### 7.10.1　属性声明和访问器
 
-#### 7.10.3　使用属性　106
+```C#
+        class X
+        {
+            public const int cv = 100;
 
-#### 7.10.4　属性和关联字段　106
+            public int v
+            {
+                set{
+                   // v = value;
+                }
 
-#### 7.10.5　执行其他计算　107
+                get {
+                    return v + 100;  // stack overflow!!!!!!!!!!!!!!!!!!!!!
+                }
+            }
+        }
+```
 
-#### 7.10.6　只读和只写属性　108
+
+
+#### 7.10.2　属性示例
+
+#### 7.10.3　使用属性
+
+#### 7.10.4　属性和关联字段
+
+#### 7.10.5　执行其他计算
+
+#### 7.10.6　只读和只写属性
+
+> 访问器只有一种,
 
 #### 7.10.7　属性与公有字段　109
 
 #### 7.10.8　计算只读属性示例　109
 
-#### 7.10.9　自动实现属性　110
+#### 7.10.9　自动实现属性
+
+```C#
+        class X
+        {
+            public const int cv = 100;
+
+            private int v_private;
+            public int v
+            {
+                set{
+                   v_private = value;
+                }
+
+                get {
+                    return v_private + 100;
+                }
+            }
+
+            public int xx{get; set;}
+        }
+```
+
+
 
 #### 7.10.10　静态属性　111
+
+- 不能访问实例成员,但是可以被实例成员访问
+- 在类内部,可以仅使用名称来引用静态属性
+- 类的外部,可以通过类名或者使用 using static 结构来引用静态属性
 
 ### 7.11　实例构造函数　112
 
@@ -402,7 +655,15 @@ System.Console.Write("Hello world")
 
 #### 7.11.2　默认构造函数　114
 
+- 如果类没有显示提供构造函数,则自动提供默认构造函数
+- 没有参数,方法体为空
+- 一旦提供了任何构造函数,将不会为其定义默认构造函数
+
 ### 7.12　静态构造函数　114
+
+- 系统自动调用静态构造函数
+  - 类实例创建之前
+  - 类的任何静态成员被引用之前
 
 ### 7.13　对象初始化语句　116
 
@@ -410,9 +671,85 @@ System.Console.Write("Hello world")
 
 ### 7.15　readonly 修饰符　117
 
+```C#
+        class Class1{
+            static Class1()
+            {
+                Console.WriteLine("static constructor");
+                static_int = 1;     // static readonly 只能在这里赋值
+            }
+
+             public Class1()
+             {
+                 Console.WriteLine("normal constructor");
+                 NumOfSliders = 333;
+                 
+             }
+
+             public int mem1;
+             public int mem2;
+
+             readonly double PI = 3.141593;
+             readonly int NumOfSliders; 
+
+             static readonly int static_int;
+        }
+```
+
+- readonly vs const
+  - const 字段在声明时,就需要初始化,设定之后就不能更改
+  - readonly 可以在
+    - 字段声明中
+    - 类的任意构造函数中,但是 static readonly 的成员 必须在静态构造函数中完成
+  - const 行为总是静态的,
+    - readonly 可以是静态字段,也可以是 实例字段
+    - readonly在内存中有存储位置
+
 ### 7.16　this 关键字　118
 
 ### 7.17　索引器　119
+
+```
+
+        class Class1{
+            static Class1()
+            {
+                Console.WriteLine("static constructor");
+                static_int = 1;     // static readonly 只能在这里赋值
+            }
+
+             public Class1()
+             {
+                 Console.WriteLine("normal constructor");
+                 NumOfSliders = 333;
+                 
+             }
+
+             public int mem1;
+             public int mem2;
+
+             readonly double PI = 3.141593;
+             readonly int NumOfSliders; 
+
+             static readonly int static_int;
+
+             public const String Name = "zzfff";
+
+
+             public int this[int index]
+             {
+                 get {return 1;}
+                 //set{}
+             }
+
+             public String this[String index]
+             {
+                 get { return "";}
+             }
+        }
+```
+
+
 
 #### 7.17.1　什么是索引器　120
 
@@ -436,7 +773,9 @@ System.Console.Write("Hello world")
 
 ### 7.19　分部类和分部类型　127
 
-### 7.20　分部方法　128
+### 7.20　分部方法　128  TODO
+
+partial
 
 ## 第8　章 类和继承　130
 
@@ -600,11 +939,56 @@ System.Console.Write("Hello world")
 
 ### 10.15　using 语句　211
 
+> 资源: 指实现了 System.IDisposable 接口的类或者结构
+
 #### 10.15.1　包装资源的使用　212
+
+|       | 分配资源                               | 使用资源 |
+| ----- | -------------------------------------- | -------- |
+| using | (ResourceType Identifier = Expression) | statment |
+
+
 
 #### 10.15.2　using 语句的示例　212
 
+```C#
+    using (Restype resouce = new ResType(...)) statement 
+	= 
+    Restype resouce = new ResType(...);
+    {
+
+        try 
+        {
+            statement 
+        }
+        finnaly
+        {
+            // 
+            // 处理资源
+        }
+    }
+```
+
+
+
 #### 10.15.3　多个资源和嵌套　213
+
+```
+            using (TextWriter tw1 = File.CreateText("a.txt"), tw2 = File.CreateText("b.txt"))
+            {
+                tw1.WriteLine("1");
+                tw2.WriteLine("2");
+            }
+
+
+            TextWriter tw = File.CreateText("c.txt");
+            using(tw)
+            {
+                ...
+            }
+```
+
+
 
 #### 10.15.4　using 语句的另一种形式　214
 
@@ -613,6 +997,13 @@ System.Console.Write("Hello world")
 ## 第　11 章 结构　216
 
 ### 11.1　什么是结构　216
+
+- 类是引用类型 结构是值类型
+- 结构是隐式密封的,不能派生其他结构
+- 隐式为结构生成 无参数的默认构造函数,而且不能删除或者重定义
+- new  为其调用默认/定义的 构造函数
+- 如果不用new 创建实例,则对所有数据成员赋值之后,才能 调用结构里的成员函数
+- 不允许声明析构函数
 
 ### 11.2　结构是值类型　217
 
@@ -628,11 +1019,40 @@ System.Console.Write("Hello world")
 
 ### 11.5　属性和字段初始化语句　221
 
+```
+    struct SimpleStru
+    {
+        public int a = 0;       // error 
+        static int s_a = 0;     // static right
+
+        public int a_t {get;set;} 
+
+        public int b_t {get;set;} = 1;  //error
+
+
+    }
+```
+
+
+
 ### 11.6　结构是密封的　221
+
+> - 不可以用下面的修饰符
+> - protected
+> - protected internal
+> - abstract
+> - sealed
+> - virtual
 
 ### 11.7　装箱和拆箱　222
 
+> - 将结构实例作为引用类型对象 必须创建装箱(boxing)副本装箱的过程就是制作值类型变量的引用类型副本
+
 ### 11.8　结构作为返回值和参数　222
+
+> - 返回值: 创建结构的副本 并返回
+> - 值参数: 创建实参结构的副本,用于方法
+> - ref / out 如果把一个结构作为 ref/out参数 传入方法的是该结构的一个引用,这样就可以修改其数据成员
 
 ### 11.9　关于结构的更多内容　222
 
@@ -657,6 +1077,10 @@ System.Console.Write("Hello world")
 ### 13.1　数组　234
 
 #### 13.1.1　定义　234
+
+`int [] a = new int[4];`
+
+`int[] a = new int[]{1,2,3,4,5}`
 
 #### 13.1.2　重要细节　235
 
@@ -712,6 +1136,13 @@ System.Console.Write("Hello world")
 
 ## 第　14 章 委托　256
 
+
+
+> - 声明委托类型  `delegate void mydel(int x);`
+> - 声明委托变量
+> - 创建委托实例,并把他的引用赋值给变量,然后增加第一个方法
+> - 调用委托对象
+
 ### 14.1　什么是委托　256
 
 ### 14.2　委托概述　258
@@ -740,11 +1171,62 @@ System.Console.Write("Hello world")
 
 #### 14.13.1　使用匿名方法　268
 
+```C#
+            MyDel thDel;
+            Program pargram = new Program();
+            thDel = new MyDel(pargram.printf);
+            
+            thDel += delegate(int v)   // 如果 v 没有用到过,可以 '(int v)' 也可以省略
+            {
+                Console.Write($"+= {v},");
+                return v+1;
+            };
+```
+
+
+
 #### 14.13.2　匿名方法的语法　268
+
+```C#
+delegate (params) { ... statment }
+```
+
+
 
 #### 14.13.3　变量和参数的作用域　270
 
+- 捕获的变量的生命周期延长了
+
+  
+
 ### 14.14　Lambda 表达式　271
+
+> `=>`
+
+- 删除 delegate 关键字
+- 参数列表和匿名方法主题放置 `'=>'`
+
+```C#
+
+            MyDel thDel;
+            Program pargram = new Program();
+            thDel = new MyDel(pargram.printf);
+            
+            thDel += delegate(int v)                //  匿名方法
+            {
+                Console.Write($"+= {v},");
+                return v+1;
+            };
+
+			thDel += (int v) => {return v + 1;};    // lambda
+            thDel += (v) =>{return v + 1;};
+            thDel += v =>{return v+1;};
+            thDel += v => v+1;
+
+            thDel(1);
+```
+
+
 
 ## 第　15 章 事件　274
 
@@ -753,6 +1235,13 @@ System.Console.Write("Hello world")
 ### 15.2　源代码组件概览　276
 
 ### 15.3　声明事件　276
+
+> 事件声明在一个类中
+>
+> - 事件是成员
+> - 必须声明在类或者 结构体中
+> - 事件声明需要委托类型的名称
+> - 事件对外部只暴露了 += / -=
 
 ### 15.4　订阅事件　277
 
@@ -764,7 +1253,82 @@ System.Console.Write("Hello world")
 
 #### 15.6.2　移除事件处理程序　283
 
+```
+    delegate void EventHandler<IncrementEventArgs>(object sender,IncrementEventArgs e);
+
+    public class IncrementEventArgs : EventArgs
+    {
+        public int IterationCount{get;set;}
+    }
+
+    class Incrementer
+    {
+        public event EventHandler<IncrementEventArgs> CountedAdozen
+        {
+            add
+            {
+                // 执行 += 运算符的代码
+            }
+
+            remove
+            {
+                // 执行 -= 运算符的代码
+            }
+        }
+
+        public void DoCount()
+        {
+            
+            IncrementEventArgs args = new IncrementEventArgs();
+            
+            for(int i = 0;i < 100 ;i++)
+                if(i%2 == 0 && CountedAdozen != null)
+                {
+                    args.IterationCount = i;
+                    CountedAdozen(this,args);
+                }
+                    
+        }
+    }
+
+    class Dozens
+    {
+        public int DozensCount{get;private set;}
+
+        public Dozens(Incrementer incrementer)
+        {
+            DozensCount = 0;
+            incrementer.CountedAdozen += this.IncrementDozensCount;
+        }
+
+        void IncrementDozensCount(object sender,IncrementEventArgs e)
+        {
+            Console.WriteLine($"Incremented at iteration :{e.IterationCount} in {sender.ToString()}");
+            DozensCount  ++ ;
+        }
+    }
+```
+
+
+
 ### 15.7　事件访问器　284
+
+```C#
+        public event EventHandler<IncrementEventArgs> CountedAdozen
+        {
+            add
+            {
+                // 执行 += 运算符的代码
+            }
+
+            remove
+            {
+                // 执行 -= 运算符的代码
+            }
+        }
+```
+
+
 
 ## 第　16 章 接口　286
 
@@ -772,11 +1336,33 @@ System.Console.Write("Hello world")
 
 ### 16.2　声明接口　291
 
+- 接口不能包含一下成员
+  - 数据成员
+  - 静态成员
+  - 接口成员不能有访问修饰符,但是接口类本身可以有
+- 可以包含 一下非静态成员
+  - 方法
+  - 属性
+  - 事件
+  - 索引器
+
 ### 16.3　实现接口　292
 
 ### 16.4　接口是引用类型　294
 
+```C#
+IIface if = (IIface) object;
+```
+
+
+
 ### 16.5　接口和as 运算符　295
+
+```C#
+IIface if = object as IIface;
+```
+
+
 
 ### 16.6　实现多个接口　295
 
@@ -787,6 +1373,17 @@ System.Console.Write("Hello world")
 ### 16.9　派生成员作为实现　299
 
 ### 16.10　显式接口成员实现　300
+
+```
+class MyCalss : IFace1,IFace2
+{
+	// 限定接口名称
+	void IFace1.PrintOut(){}
+	void IFace2.PrintOut(){}
+}
+```
+
+
 
 ### 16.11　接口可以继承接口　302
 
