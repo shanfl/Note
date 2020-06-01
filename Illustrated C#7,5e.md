@@ -833,7 +833,26 @@ partial
 
 ### 8.13　静态类　156
 
+- 类本身 标记 为 **static**
+- 所有的成员必须是 静态的
+- 可以有静态构造函数
+- 隐式**密封**,不能被继承
+
 ### 8.14　扩展方法　157
+
+```
+static class ExtendData
+{
+	public static double Average(this DataCalss md, parameters...)
+	{
+		...
+	}
+}
+
+md.Average()
+```
+
+
 
 ### 8.15　命名约定　160
 
@@ -1372,6 +1391,23 @@ IIface if = object as IIface;
 
 ### 16.9　派生成员作为实现　299
 
+```C#
+        class Base : ISomeDoing
+        {
+            public void PrintOut()
+            {
+
+            }
+        }
+
+        class Derived:Base,ISomeDoing
+        {
+
+        }
+```
+
+
+
 ### 16.10　显式接口成员实现　300
 
 ```
@@ -1381,6 +1417,9 @@ class MyCalss : IFace1,IFace2
 	void IFace1.PrintOut(){}
 	void IFace2.PrintOut(){}
 }
+
+MyCalss my = new MyCalss();
+((IFace1)my).PrintOut();
 ```
 
 
@@ -1423,7 +1462,26 @@ class MyCalss : IFace1,IFace2
 
 ### 17.8　拆箱转换　320
 
+> **装箱** 是一种隐式转换 它接受值类型的值,根据这个值在堆上创建一个完整的引用类型对象,并返回对象引用
+
 ### 17.9　用户自定义转换　321
+
+```C#
+        class Derived:Base,ISomeDoing
+        {
+            public static implicit/explicit operator int(Derived p)
+            {
+                return 1;
+            }
+
+            public static implicit/explicit operator Derived(int i)
+            {
+                return new Derived();
+            }
+        }
+```
+
+
 
 #### 17.9.1　用户自定义转换的约束　322
 
@@ -1435,15 +1493,53 @@ class MyCalss : IFace1,IFace2
 
 ### 17.10　is 运算符　325
 
+> 转换之前可以用**is** 判断是否能够转换成功
+
 ### 17.11　as 运算符　326
+
+> **as 与强制转换符不同,as 不抛出异常,转换失败时,返回null**
 
 ## 第　18 章 泛型　327
 
 ### 18.1　什么是泛型　327
 
+- 非泛型类型
+  - 委托
+  - 数组
+  - 枚举
+  - 结构
+  - 类
+  - 接口
+- 泛型类型
+  - 类
+  - 结构
+  - 接口
+  - 委托
+
 ### 18.2　C#中的泛型　329
 
+- 泛型类
+- 泛型方法
+- 泛型扩展方法
+- 泛型结构
+- 泛型委托
+- 泛型接口
+- 协变/逆变
+
 ### 18.3　泛型类　330
+
+```C#
+    // T1,T2 ==> 类型参数(type parameter)
+	class SomeClass<T1,T2>
+    {
+
+    }
+
+    // 类型实参 (type argument)
+    SomeClass<int,float> mm;
+```
+
+
 
 #### 18.3.1　声明泛型类　331
 
@@ -1461,6 +1557,20 @@ class MyCalss : IFace1,IFace2
 
 #### 18.4.2　约束类型和次序　337
 
+> 约束类型
+>
+> | 约束类型 | 描述                                                         |
+> | :------: | :----------------------------------------------------------- |
+> |   类名   | 只有这个类或是派生类才能作为类型实参                         |
+> |  class   | 任何引用类型,包括类,数组,委托,接口 都可以作为类型实参        |
+> |  struct  | 任何值类型 都可以作为类型实参                                |
+> |  接口名  | 只有这个接口,或者实现了这个接口的类型才能作为类型实参        |
+> |  new()   | 任何带无参公共构造函数的类型可以作为类型实参,这叫做 **构造函数约束** |
+>
+> - 最多一个主约束
+> - 接口约束可以任意多个
+> - 构造函数约束必须放到最后
+
 ### 18.5　泛型方法　337
 
 #### 18.5.1　声明泛型方法　338
@@ -1469,19 +1579,59 @@ class MyCalss : IFace1,IFace2
 
 #### 18.5.3　泛型方法的示例　339
 
+```
+        //                  类型参数列表  方法参数列表  约束字句
+        public void PrintData<S,T>(S s, T t) where S:MyStack
+        {
+
+        }
+```
+
+
+
 ### 18.6　扩展方法和泛型类　340
 
 ### 18.7　泛型结构　341
 
 ### 18.8　泛型委托　342
 
+```
+ delegate R th_del<T,R>(T t);
+
+```
+
+
+
 ### 18.9　泛型接口　344
+
+```
+interface IInfo<T>
+{
+	...
+}
+
+class My<T> : IInfo<T>
+{
+}
+class MyS<S,T>:Info<T>
+{
+
+}
+```
+
+
 
 #### 18.9.1　使用泛型接口的示例　345
 
 #### 18.9.2　泛型接口的实现必须唯一　345
 
 ### 18.10　协变和逆变　346
+
+> 可变性(variance)
+>
+> - 协变 convariance
+> - 逆变 contravariance
+> - 不变 invariance
 
 #### 18.10.1　协变　346
 
@@ -1496,6 +1646,14 @@ class MyCalss : IFace1,IFace2
 ## 第　19 章 枚举器和迭代器　354
 
 ### 19.1　枚举器和可枚举类型　354
+
+```C#
+foreach(Type varName in EnumerableObject)
+{ ... }
+```
+
+- 实现** GetEnumerator**方法的类型 叫作 **可枚举类型(enumerable type / enumerable)**
+- 
 
 ### 19.2　IEnumerator 接口　356
 
@@ -1591,13 +1749,55 @@ class MyCalss : IFace1,IFace2
 
 #### 21.3.3　在调用方法中同步地等待任务　430
 
+```
+task.Wait()
+Task.WaitAll()
+Task.WaitAny()
+```
+
+
+
 #### 21.3.4　在异步方法中异步地等待任务　433
+
+```
+Task<string> t1 = ...
+Task<string> t2 = ...
+List<Task<string>> tasks = ...
+tasks.add(t1)
+tasks.add(t2)
+await Task.WhenAll(tasks)
+...
+```
+
+
 
 #### 21.3.5　Task.Delay 方法　435
 
+> 与Thread.Sleep阻塞线程不同，Task.Delay 不会阻塞线程
+>
+> ```C#
+> private async void ShowDelayAsync()
+> {
+> 	await Task.Delay(1000);
+> }
+> ```
+
 ### 21.4　GUI 程序中的异步操作　436
 
+`Task.Yeild`
+
+
+
 ### 21.5　使用异步Lambda 表达式　440
+
+```
+startWorkButton.Click += async(sender,e)=>
+{
+	// ... 
+}
+```
+
+
 
 ### 21.6　完整的GUI 程序　441
 
