@@ -1657,7 +1657,120 @@ foreach(Type varName in EnumerableObject)
 
 ### 19.2　IEnumerator 接口　356
 
+- Current
+- MoveNext
+- Reset
+
+```C#
+            int[] a = {1,2,3,4,5,6,7};
+
+            // 
+            foreach(int item in a)
+            {
+                Console.WriteLine($"item: {item}");
+            }
+
+            IEnumerator ie = a.GetEnumerator();            
+			while(ie.MoveNext())
+            {
+                Console.WriteLine($"{ie.Current}");
+            }
+```
+
+
+
 ### 19.3　IEnumerable 接口　358
+
+```
+class MyClass:IEnumerable
+{
+	IEnumerator GetEnumerator();
+}
+```
+
+```c#
+    class TestEnumerator
+    {
+        public void test()
+        {
+            int[] a = {1,2,3,4,5,6,7};
+
+            // 
+            foreach(int item in a)
+            {
+                Console.WriteLine($"item: {item}");
+            }
+
+            IEnumerator ie = a.GetEnumerator();
+
+            while(ie.MoveNext())
+            {
+                Console.WriteLine($"{ie.Current}");
+            }
+
+            ie.Reset();
+
+
+            EnuClass eu = new EnuClass();
+            foreach(string color in eu)
+            {
+                Console.WriteLine($"{color}");
+            }
+
+        }
+
+
+        public class ColorEnumerator:IEnumerator
+        {
+            public ColorEnumerator(string[] clrAry)
+            {
+                _colorAry = new string[clrAry.Length];
+                for(int i = 0; i <clrAry.Length;i++)
+                    _colorAry[i] = clrAry[i];
+            }
+            public object Current 
+            {
+                get 
+                {
+                    if(position == -1)
+                        throw new InvalidOperationException();
+                    if(position > _colorAry.Length )
+                        throw new InvalidOperationException();
+                    
+                    return _colorAry[position];
+                }
+            }
+
+            public bool MoveNext()
+            {
+                if(position < _colorAry.Length - 1)
+                {
+                    position++;
+                    return true;
+                }
+
+                return false;
+            }
+
+            public void Reset()
+            {
+                position = -1;
+            }
+
+            int position = -1;
+            string []_colorAry;
+        }
+        public class EnuClass : IEnumerable
+        {
+            string [] _colors  = {"red","blue","yell"};
+            public IEnumerator GetEnumerator()
+            {
+                return new ColorEnumerator(_colors);
+            }
+        }
+```
+
+
 
 ### 19.4　泛型枚举接口　360
 
