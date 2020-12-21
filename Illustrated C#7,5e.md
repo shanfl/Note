@@ -1780,13 +1780,55 @@ class MyClass:IEnumerable
 
 #### 19.5.2　使用迭代器来创建枚举器　363
 
+```
+
+```
+
+
+
 #### 19.5.3　使用迭代器来创建可枚举类型　365
+
+```
+        public IEnumerator<string> CcColorEnu()
+        {
+            yield return "red";
+            yield return "blue";
+            yield return "yellow";
+        }
+
+        public IEnumerator<string> GetEnumerator()
+        {
+            //return CcColorEnu();
+            string[] a = {"a","b","c"};
+
+            for(int i = 0;i < a.Length;i++)
+                yield return a[i];
+        }
+```
+
+
 
 ### 19.6　常见迭代器模式　366
 
 ### 19.7　产生多个可枚举类型　367
 
 ### 19.8　将迭代器作为属性　368
+
+```
+class MyClass
+{
+	public IEnumerator<string> UVtoIR
+	{
+		get
+		{
+			for(int i = 0;i < colors.Length;i++)
+				yeild return colors[i];
+		}
+	}
+}
+```
+
+
 
 ### 19.9　迭代器的实质　369
 

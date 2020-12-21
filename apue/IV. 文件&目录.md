@@ -133,3 +133,285 @@ chmod
    2. 如果进程的有效用户ID == 文件的所有者ID,则检查文件的访问相应权限是否被设置了,设置了,则允许,否则拒绝.
    3. 若进程组有效组ID == 文件的组ID,那么组的相应权限被设置,则允许访问,否则拒绝
    4. 若其他用户的相应权限被设置,则允许,否则拒绝
+
+##### 4.6 新文件&目录所有权
+
+新文件的用户ID设置为进程的有效用户ID. 
+
+关于组ID
+
+1. 新文件的组ID可以是进程的有效组ID
+2. 新文件的组ID可以是它所在目录的组ID
+
+##### 4.7 函数 access & faccessat
+
+如上所说,open 时,内核以进程的有效用户ID和有效组ID为基础执行其访问权限**测试**. 但是,有时候进程也希望按其 实际用户ID和实际组ID来测试访问能力.
+
+
+
+access & faccessat 是按照实际用户ID和实际组ID进行访问权限检测的.
+
+```C++
+#include <unistd.h>
+int access(const char* pathname,int mode);
+int faccessat(int fd,const char* pathname,int mode,int flag); 
+/*
+	flags = AT_EACCESS 则采用有效用户/组ID,而不是实际.
+*/
+
+faccessat(AT_FDCWD,pathname,...) = access(pathname,mode,...)
+```
+
+| mode | intro        |
+| ---- | ------------ |
+| R_OK | 测试读权限   |
+| W_OK | 测试写权限   |
+| X_OK | 测试执行权限 |
+
+
+
+##### 4.8 umask
+
+```c++
+#include <sys/stat.h>
+mode_t umask(mode_t cmask);
+/*
+S_IRUSR
+S_IWUSR
+S_IXUSR
+S_IRGRP
+S_IWGRP
+S_IXGRP
+S_IROTH
+S_IWOTH
+S_IXOTH
+*/
+```
+
+```
+umask
+umask -S
+umask 027
+```
+
+##### 4.9 chmod fchmod fchmodat
+
+```c++
+#include <sys/stat.h>
+int chmod(const char*pathname,mode_t mode);
+int fchmod(int fd,mode_t mode);
+int fchmodat(int fd,const char*pathname,mode_t ,int flag);		
+```
+
+
+
+| mode    | intro |
+| ------- | ----- |
+| S_ISUID |       |
+| S_ISGID |       |
+| S_ISVTX |       |
+| ---     |       |
+| S_IRWXU |       |
+| S_IRUSR |       |
+| S_IWUSR |       |
+| S_IXUSR |       |
+| ---     |       |
+| S_IRWXG |       |
+| S_IRGRP |       |
+| S_IWGRP |       |
+| S_IXGRP |       |
+| ---     |       |
+| S_IRWXO |       |
+| S_IROTH |       |
+| S_IWOTH |       |
+| S_IXOTH |       |
+
+
+
+##### 4.10 粘着位
+
+/tmp  /var/tmp
+
+##### 4.11 chown fchown fchownat lchown
+
+```c++
+#include <unistd.h>
+int chown(const char*pathname,uid_t owner,gid_t group);
+int fchown(int fd,uid_t owner,gid_t group,int flag);
+int fchownat(int fd,const *pathname,uid_t owner,gid_t group,int flag);
+int lchown(const char*pathname,uid_t owner,gid_t group,)
+```
+
+flag 设置 AT_SYMLINK_NOFOLLOW    更改符号链接本身的所有者  fchownat == lchown
+
+
+
+##### 4.12 文件长度
+
+stat.st_size  字节为单位的长度
+
+
+
+##### 4.13 文件截断
+
+```c++
+#include <unistd.h>
+int truncate(const char*pathname,off_t length);
+int ftruncate(int fd,off_t length);
+```
+
+
+
+##### 4.14 文件系统
+
+
+
+##### 4.15 link  linkat  unlink  unlinkat  & remove  硬链接
+
+
+
+```c++
+#include <unistd.h>
+int link(const char*existingpath,const char*newpath);
+int linkat(const int efd,const char*existingpath,int nfd,const char*newpath,int flag);
+
+int unlink(const char* pathname);
+int unlinkat(int fd,const char*pathname,int flag);
+
+
+#include <stdio.h>
+int remove(const char*pathname);
+```
+
+
+
+##### 4.16 rename & renameat
+
+```
+#include<stdio.h>
+int rename(const char*oldname,const char*newname);
+int renameat(int oldfd,const char*oldname,int newfd,const char*newname);
+```
+
+
+
+
+
+##### 4.17 符号链接
+
+硬链接 直接指向文件的i节点
+
+
+
+##### 4.18 创建 & 读取符号链接
+
+```c++
+#include <unistd.h>
+int symlink(const char* actualpath,const char*sympath);
+int symlinkat(const char*actualpath,int fd,const char*sympath);
+```
+
+因为open函数跟随符号链接直达链接所指向的文件,而符号链接本身的读取需要其他函数提供
+
+```c++
+#include <unistd.h>
+ssize_t readlink(constchar*restrict pathname,char* buf,size_t bufsize);
+ssize_t readlinkat(int fd,char*pathname,char*buf,size_t bufsize);
+
+/*
+	如果 fd = AT_FDCWD readlinkat = readlink
+*/
+```
+
+
+
+##### 4.19 文件时间
+
+| -字段   | -说明                 | -例子       | -ls 选项 |
+| ------- | --------------------- | ----------- | -------- |
+| st_atim | 文件数据最后访问时间  | read        | -u       |
+| st_mtim | 文件数据最后更改时间  | write       | default  |
+| st_ctim | i节点状态最后更改时间 | chmod chown | -c       |
+
+`i节点的信息 与 文件的实际内容是分开的`
+
+##### 4.20 futimens  utimensat  utimes 
+
+```c++
+#include <sys/stat.h>
+int futimens(int fd,const struct timespec times[2]);
+int utimensat(int fd,const char*path,const struct timespec times[2],int flag);
+
+#include <sys/time.h>
+int utimes(const char*pathname,const struct timeval times[2]);
+```
+
+```
+struct timeval{
+	time_t tv_sec;
+	time_t tv_usec;
+}
+```
+
+
+
+
+
+##### 4.21 mkdir mkdirat rmdir
+
+```c++
+#include <sys/stat.h>
+int mkdir(const char*pathname,mode_t mode);
+int mkdirat(int fd,const char*pathname,mode_t mode);
+
+#include <unistd.h>
+int rmdir(const char*dirname);
+```
+
+##### 4.22 读目录
+
+```c++
+#include <dirent.h>
+DIR*opendir(const char* pathname);
+DIR*fdopendir(int fd);
+
+struct dirent *readdir(DIR*dp);
+void rewinddir(DIR*dp);
+int closedir(DIR*dp);
+
+long telldir(DIR*dp);
+
+void seekdir(DIR*dp,long loc);
+```
+
+```
+struct dirent{
+...
+	ino_t d_ino;
+	char d_name[];
+}
+```
+
+
+
+##### 4.23 chdir fchdir  getcwd
+
+```c++
+// 更改当前工作目录
+#include <unistd.h>
+int chdir(const char*pathname);
+int fchdir(int fd);
+
+char* getcwd(char*buf,size_t size);
+```
+
+
+
+##### 4.24 设备特殊文件 st_dev  st_rdev
+
+
+
+##### 4.25 文件访问权小结
+
+
+
