@@ -70,7 +70,186 @@ FILE*fdopen(int fd,char*type);
 | r  / rb      |        | O_RDONLY                        |
 | w / wb       |        | O_WRONLY \| O_CREAT \| O_TRUNC  |
 | a / ab       |        | O_WRONLY \| O_CREAT \| O_APPEND |
-| r+ / r+b rb+ |        |                                 |
-| w+  w+b  wb+ |        |                                 |
-| a+ a+b ab+   |        |                                 |
+| r+ / r+b rb+ |        | O_RDWR                          |
+| w+  w+b  wb+ |        | O_RDRW \| O_CREAT \| O_TRUNC    |
+| a+ a+b ab+   |        | O_RDRW \| O_CREAT \| O_APPEND   |
+
+```c
+#include <stdio.h>
+int fclose(FILE*fp);
+```
+
+
+
+##### 5.6 读 & 写 流
+
+```c
+#include <stdio.h>
+int getc(FILE*fp);
+int fgetc(FILE*fp);
+int getchar(void);
+
+
+int ferror(FILE*fp);
+int feof(FILE*fp);
+
+
+void clearerr(FILE*fp);
+
+int ugetc(int c,FILE*fp);
+```
+
+
+
+
+
+```c
+int putc(int c,FILE*fp);
+int fputc(int c,FILE*fp);
+int putchar(int c);
+```
+
+
+
+
+
+##### 5.7 行I/O
+
+```c
+char* fgets(char*buf,int n ,FILE*fp);
+char* gets(char*buf);
+
+int fputs(char*str,FILE*fp);
+int puts(char*str);
+```
+
+
+
+##### 5.8 标准I/O效率
+
+
+
+##### 5. 9  二进制I/O
+
+```c
+size_t fread(void * ptr,size_t size ,size_t nobj,FILE*fp);
+size_t fwrite(const void *Ptr,size_t size size_t nobj,FILE*fp);
+```
+
+
+
+##### 5.10 定位流
+
+
+
+```c
+long ftell(FILE*fp);
+int fseek(FILE*fp,long offset,int whence);
+void rewind(FILE*fp);
+```
+
+
+
+```c
+off_t ftello(FILE*fp);
+int fseeko(FILE*fp,off_t offset,int whence);
+```
+
+
+
+```c
+int fgetpos(FILE*fp,fpos_t *pos);
+int fsetpos(FILE*fp,fpos_t *pos);
+```
+
+
+
+##### 5.11 格式化 i/o
+
+1. 格式化输出
+
+   ```c
+   printf
+   fprintf
+   dprintf
+   sprintf
+   snprintf
+   ```
+
+   ```c
+   vprintf
+   vfprintf
+   vdprintf
+   vsprintf
+   vsnprintf
+   ```
+
+
+
+2. 格式化输入
+
+   ```c
+   [v]scanf
+   [v]fscanf
+   [v]sscanf
+   
+   ```
+
+   
+
+##### 5.12 
+
+```c
+int fileno(FILE*fp);  //posix.1
+```
+
+
+
+
+
+##### 5.13 临时文件
+
+
+
+```c
+char*tmpnam(char*ptr);
+FILE*tmpfile(void);
+
+
+
+#include <stdlib.h>
+char*mkdtemp(char*tmplate);
+int mkstemp(char*template);
+```
+
+
+
+##### 5.14 内存流
+
+```c
+#include <stdio.h>
+FILE*fmemopen(void*buf,size_t size,char*type);
+```
+
+
+
+
+
+| type          |      |
+| ------------- | ---- |
+| r    /    rb  |      |
+| w  wb         | -    |
+| a   / ab      |      |
+| r+   r+b  rb+ |      |
+| w+  w+b  wb+  |      |
+| a+  a+b ab+   |      |
+
+```c
+#include <stdio.h>
+FILE* open_memstream(char**bufp,size_t*sizep);
+
+
+#include <wchar.h>
+FILE*open_wmemstream(wchar_t ** bufp,size_t sizep);
+```
 
