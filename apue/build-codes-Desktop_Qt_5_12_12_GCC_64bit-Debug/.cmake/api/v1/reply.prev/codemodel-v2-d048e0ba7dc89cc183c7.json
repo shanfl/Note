@@ -1,0 +1,83 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "aupe",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "1.4::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-1.4-Debug-cb5ef0de02a51837b240.json",
+					"name" : "1.4",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "1.5::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-1.5-Debug-7d4855d9536d5f9c4977.json",
+					"name" : "1.5",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "1.6::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-1.6-Debug-69ca323e8b0be84f5927.json",
+					"name" : "1.6",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "1.7::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-1.7-Debug-ae2647110cb75778a36b.json",
+					"name" : "1.7",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/media/shanfl/KINGSTON1/Note/apue/build-codes-Desktop_Qt_5_12_12_GCC_64bit-Debug",
+		"source" : "/media/shanfl/KINGSTON1/Note/apue/codes"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

@@ -1,0 +1,8 @@
+/media/shanfl/KINGSTON1/Note/apue/build-codes-Desktop_Qt_5_12_12_GCC_64bit-Debug/CMakeFiles/1.4.dir
+/media/shanfl/KINGSTON1/Note/apue/build-codes-Desktop_Qt_5_12_12_GCC_64bit-Debug/CMakeFiles/1.5.dir
+/media/shanfl/KINGSTON1/Note/apue/build-codes-Desktop_Qt_5_12_12_GCC_64bit-Debug/CMakeFiles/1.6.dir
+/media/shanfl/KINGSTON1/Note/apue/build-codes-Desktop_Qt_5_12_12_GCC_64bit-Debug/CMakeFiles/1.7.dir
+/media/shanfl/KINGSTON1/Note/apue/build-codes-Desktop_Qt_5_12_12_GCC_64bit-Debug/CMakeFiles/1.8.1.dir
+/media/shanfl/KINGSTON1/Note/apue/build-codes-Desktop_Qt_5_12_12_GCC_64bit-Debug/CMakeFiles/1.9.dir
+/media/shanfl/KINGSTON1/Note/apue/build-codes-Desktop_Qt_5_12_12_GCC_64bit-Debug/CMakeFiles/edit_cache.dir
+/media/shanfl/KINGSTON1/Note/apue/build-codes-Desktop_Qt_5_12_12_GCC_64bit-Debug/CMakeFiles/rebuild_cache.dir
