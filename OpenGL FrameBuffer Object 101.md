@@ -1,24 +1,30 @@
 ## OpenGL FrameBuffer Object 101
-=====   
-by Rob 'phantom' Jones
+
+                                                                    by Rob 'phantom' Jones
+
+ 
+
+
 ----  
-####  Introduction
+
+#### Introduction
 
 The Frame Buffer Object (FBO) extension was introduced to make Render to Texture objects much more efficient and much easier to perform when compared with the copying or pbuffer alternatives.
 
 In this little article I’m going to give you a quick over view of how to use this extension and some things to keep in mind when using it so you can add faster Render to Texture functionality to your OpenGL programs.
 
-####  Setting Up
+#### Setting Up
 
 As with the other objects in OpenGL (texture object, pixel buffer objects and vertex buffer object) before you can use a FBO you have to create a valid handle to it:
-```
+
+```cpp
 GLuint fbo;
 glGenFramebuffersEXT(1, &fbo);```
 To perform any operations on a FBO you need to bind it, much like you would a VBO or texture, so that the operations can be performed on it, this is done via the following code
 ```
+
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);```
 The first parameter is the ‘target’ you wish to bind the framebuffer to, right now the only target you can use is the one indicated above however it is possible future extensions might allow you to bind it somewhere else. The fbo variable holds the handle to the FBO we requested earlier. To perform any FBO related operations you need to have a FBO bound or the calls will fail.
-
 
 #### Adding a Depth Buffer
 
@@ -29,35 +35,40 @@ A renderbuffer are just objects which are used to support offscreen rendering, o
 In this case we are going to use a renderbuffer to give our FBO a depth buffer to use while rendering.
 
 Like the FBO we first of all have to get a handle to a valid **renderbuffer**:
-```
+
+```cpp
 GLuint depthbuffer;
 glGenRenderbuffersEXT(1, &depthbuffer);```
 Having successfully done this we need to bind the renderbuffer so that it is the current renderbuffer for the following operations:
 ```
+
 glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depthbuffer);```
 As with a FBO bind the first parameter is the ‘target’ you wish to bind to, which right now can only be the indicated target. The depthbuffer variable holds the handle to the renderbuffer we’ll be working with after this.
 
 At this point the renderbuffer doesn’t have any storage space associated with it, so we need to tell OpenGL how we want to use it and what size we’d like. In this case we are asking for a depth buffer of a certain size:
-```
+
+```cpp
 glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, width, height);```
 Upon successful completion of the above code OpenGL will have allocated space for the renderbuffer to be used as a depth buffer with a given width and height. Note that renderbuffers can be used for normal RGB/RGBA storage and could be used to store stencil information.
 
 Having reserved the space for the depth buffer the next job is to attach it to the FBO we created earlier.
 ```
+
 glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depthbuffer);```
 While it might look a bit imposing the function is pretty easy to understand; all it is doing is attaching the depthbuffer we created earlier to the currently bound FBO to its depth buffer attachment point.
-
 
 #### Adding a Texture To Render To
 
 At this point we still don’t have a way of writing colour information to the FBO, so that is what we are going to add now. There are two ways of going about it:
+
 - Attach a colour Renderbuffer to the FBO
 - Attach a texture to the FBO
 
 The former does have some uses; however it is the latter we will be covering here.
 
 Before you can attach a texture you need to create one, this hasn’t changed from the normal way of using textures as you’ll see:
-```
+
+```cpp
 GLuint img;
 glGenTextures(1, &img);
 glBindTexture(GL_TEXTURE_2D, img);
@@ -67,13 +78,15 @@ In this instance we are creating a normal RGBA image of **the same width and hei
 
 Having created our texture the next job is to attach it to the FBO so we can render to it:
 ```
+
 glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, img, 0);```
 Again this might look imposing but it isn’t that bad, the **GL_COLOR_ATTACHMENT0_EXT** tells OpenGL to attach it to the relevent attachment point (FBOs can have more than one colour buffer attached at any given time, each one to a different point), the **GL_TEXTURE_2D** tells OpenGL the format of the texture we are going to be attaching, img is the texture we’ll be attaching and the ‘0’ refers to the mipmap level of the texture you want to attach to, which you will generally want to leave as 0.
 
 The final job to do in setup is to check that the FBO is ‘complete’. Completeness refers to the state of the FBO being one which, given the current OpenGL state and its attachments, all is correct for you to render to it.
 
 This test is done via a single function which returns the status of the currently bound FBO
-```
+
+```c
 GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);```
 If all has gone well then status will equal **GL_FRAMEBUFFER_COMPLETE_EXT** and your FBO is ready to be rendered to. Other error codes, as found in the spec, indicate other problems which might well have occurred when you tried to setup the FBO.
 
@@ -84,10 +97,10 @@ With all the hard work setting things up done the usage of the FBO from here on 
 
 To render to a FBO you bind it and to stop rendering to it you call the above again with ‘0’ as the final parameter:
 ```
+
 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 glPushAttrib(GL_VIEWPORT_BIT);
 glViewport(0,0,width, height);
-
 
 // Render as normal here
 // output goes to the FBO and it’s attached buffers
@@ -98,12 +111,12 @@ Three lines which probably jumped out at you right away are the glPushAttrib/glP
 
 An important point to make here is that you’ll notice that we only bound and then unbound the FBO to draw to it, we didn’t reattach any textures or renderbuffers, this because they stay attached until you detach them yourself or the FBO is destroyed.
 
-
 #### Using The Rendered To Texture
 
 At this point our scene has been rendered to the texture and is now ready for us to use it and this operation itself is easy; we just bind the attached texture like any other texture.
-```
-glBindTexture(GL_TEXTURE_2D, img);```
+
+```cpp
+glBindTexture(GL_TEXTURE_2D, img);
 Having carried that out the texture is now ready to read from as normal.
 
 Depending on the texture’s filtering setup you might also want to generate mipmap information for it. Many people are used to using the gluBuild2DMipmaps() function to build mipmap information at load time and some of you might also be aware of the automatic mipmap generation extension; the FBO extension adds a third way with the GenerateMipmapEXT() function.
@@ -112,14 +125,16 @@ This function lets OpenGL build the mipmap information for you, the way it’s d
 
 To use the function all you have to do is bind a texture as above and then call:
 ```
-glGenerateMipmapEXT(GL_TEXTURE_2D);```
-OpenGL will then generate all the required mipmap data for you so that your texture is ready to be used.
+
+```glGenerateMipmapEXT(GL_TEXTURE_2D);```
+
+```
 
 It’s important to note that if you intend on using any of the mipmap filters (GL_LINEAR_MIPMAP_LINEAR for example) then you must call glGenerateMipmapEXT() before checking the framebuffer is complete or attempting to render to it.
 
 At setup time you can just do it as follows:
 
-```
+```cpp
 glGenTextures(1, &img);
 glBindTexture(GL_TEXTURE_2D, img);
 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,  width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -133,6 +148,7 @@ glGenerateMipmapEXT(GL_TEXTURE_2D);
 At this point your texture is complete and can be rendered to like normal.
 
 #### Cleaning Up
+
 Finally, when you are done with your FBO you need to clean things up and delete it. This, like textures, is done via a single function:
 
 `glDeleteFramebuffersEXT(1, &fbo);`
