@@ -59,7 +59,8 @@ scp -r gitlab-src     dest-ssh:/srv/
 
 0. 安装docer engine
 
-因为我们scp拷贝gitalb的物理目录到了 /srv
+因为我们scp拷贝gitalb的物理目录到了 /srv目录
+
 `tree /srv -L 2`
 
 ```
