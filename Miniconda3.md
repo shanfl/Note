@@ -1,5 +1,5 @@
 ## miniconda3
-### 环境
+### I. 环境
 #### 验证环境
 ```
 conda env list
