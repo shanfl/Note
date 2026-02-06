@@ -27,7 +27,7 @@ conda create -n opencv3 python=3.7
 ```
 
 #### 修改.condarc (永久配置)
-```
+``` yaml
 envs_dirs:
   - M:\conda_envs
   - C:\Users\你的用户名\.conda\envs
