@@ -10,3 +10,9 @@
 # 直接指定完整路径到M盘
 conda create --prefix M:\conda_envs\opencv3 python=3.7
 ```
+
+#### 激活
+```
+# 激活时也要使用完整路径
+conda activate M:\conda_envs\opencv3
+```
